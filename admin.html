@@ -7,29 +7,22 @@
 <body style="
 margin:0;
 font-family:Arial;
-background:#f4f6f9;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;">
-
-<div style="width:100%; max-width:900px;">
+background:url('https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png') no-repeat center;
+background-size:500px;
+background-color:#f4f6f9;
+padding:40px;
+">
 
 <!-- LOGIN -->
-<div id="loginBox" style="
-background:white;
-padding:30px;
-border-radius:12px;
-box-shadow:0 10px 30px rgba(0,0,0,0.1);
-text-align:center;">
+<div id="loginBox" style="max-width:400px; margin:auto; text-align:center;">
 
 <h2>Admin Login</h2>
 
 <input type="email" id="email" placeholder="Enter Email"
-style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc;">
+style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc; background:white;">
 
 <input type="password" id="password" placeholder="Enter Password"
-style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc;">
+style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc; background:white;">
 
 <button onclick="login()" style="
 width:100%;
@@ -45,17 +38,16 @@ Login
 </div>
 
 <!-- DASHBOARD -->
-<div id="dashboard" style="
-display:none;
-background:white;
-padding:20px;
-border-radius:12px;
-box-shadow:0 10px 30px rgba(0,0,0,0.1);">
+<div id="dashboard" style="display:none; margin-top:40px;">
 
 <h2 style="text-align:center;">Employee Work Data</h2>
 <h3 style="text-align:center;">Total Entries: <span id="count"></span></h3>
 
-<table border="1" style="width:100%; border-collapse:collapse; margin-top:20px;">
+<table border="1" style="
+width:100%;
+border-collapse:collapse;
+background:white;
+margin-top:20px;">
 <thead>
 <tr>
 <th>Name</th>
@@ -73,22 +65,9 @@ box-shadow:0 10px 30px rgba(0,0,0,0.1);">
 
 </div>
 
-</div>
-
-<!-- WATERMARK -->
-<div style="
-position:fixed;
-top:50%;
-left:50%;
-transform:translate(-50%, -50%);
-opacity:0.04;
-z-index:-1;">
-  <img src="https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png" width="500">
-</div>
-
 <script>
-const ADMIN_EMAIL = "davidthangchikim@gmail.com";   // 🔴 change this
-const ADMIN_PASSWORD = "Chikim-khomni";       // 🔴 change this
+const ADMIN_EMAIL = "davidthangchikim@gmail.com";
+const ADMIN_PASSWORD = "Chikim-khomni";
 
 function login() {
   const email = document.getElementById("email").value;
@@ -99,7 +78,7 @@ function login() {
     document.getElementById("dashboard").style.display = "block";
     loadData();
   } else {
-    alert("Invalid email or password");
+    alert("Invalid login");
   }
 }
 
