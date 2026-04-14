@@ -4,20 +4,37 @@
   <title>Work Tracker</title>
 </head>
 
-<body style="font-family: Arial; background:#f4f6f9; text-align:center; padding:20px;">
+<body style="
+margin:0;
+font-family:Arial;
+background:#f4f6f9;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;">
 
-<div style="max-width:400px; margin:auto; background:white; padding:25px; border-radius:12px; box-shadow:0 0 15px rgba(0,0,0,0.1);">
+<div style="
+width:100%;
+max-width:450px;
+background:white;
+padding:30px;
+border-radius:12px;
+box-shadow:0 10px 30px rgba(0,0,0,0.1);">
 
-<h2>Hourly Work Entry</h2>
-<p style="color:gray;">Track your work every hour</p>
+<h2 style="text-align:center;">Hourly Work Entry</h2>
+<p style="text-align:center; color:gray;">Track your work every hour</p>
 
-<input type="text" id="name" placeholder="Your Name" style="width:100%; padding:10px;"><br><br>
+<input id="name" placeholder="Your Name"
+style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc;">
 
-<input type="email" id="email" placeholder="Your Email" style="width:100%; padding:10px;"><br><br>
+<input id="email" type="email" placeholder="Your Email"
+style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc;">
 
-<input type="date" id="date" style="width:100%; padding:10px;"><br><br>
+<input id="date" type="date"
+style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc;">
 
-<select id="hour" style="width:100%; padding:10px;">
+<select id="hour"
+style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc;">
   <option>9-10 AM</option>
   <option>10-11 AM</option>
   <option>11-12 PM</option>
@@ -26,35 +43,43 @@
   <option>2-3 PM</option>
   <option>3-4 PM</option>
   <option>4-5 PM</option>
-</select><br><br>
+</select>
 
-<textarea id="work" placeholder="What are you doing?" style="width:100%; padding:10px;"></textarea><br><br>
+<textarea id="work" placeholder="What are you doing?"
+style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc;"></textarea>
 
-<select id="status" style="width:100%; padding:10px;">
+<select id="status"
+style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc;">
   <option>Pending</option>
   <option>Completed</option>
-</select><br><br>
+</select>
 
-<button onclick="submitData()" style="width:100%; padding:12px; background:#007bff; color:white; border:none; border-radius:6px;">
+<button onclick="submitData()" style="
+width:100%;
+padding:12px;
+background:#007bff;
+color:white;
+border:none;
+border-radius:6px;
+margin-top:15px;">
 Submit
 </button>
 
 </div>
 
-<!-- CENTER WATERMARK -->
+<!-- WATERMARK -->
 <div style="
 position:fixed;
 top:50%;
 left:50%;
 transform:translate(-50%, -50%);
-opacity:0.05;
+opacity:0.04;
 z-index:-1;">
-  <img src="https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png" width="300">
+  <img src="https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png" width="500">
 </div>
 
 <script>
 function submitData() {
-
   const data = {
     name: document.getElementById("name").value,
     email: document.getElementById("email").value,
@@ -72,10 +97,7 @@ function submitData() {
   .then(() => {
     alert("Submitted Successfully");
 
-    document.getElementById("name").value = "";
-    document.getElementById("email").value = "";
-    document.getElementById("date").value = "";
-    document.getElementById("work").value = "";
+    document.querySelectorAll("input, textarea").forEach(el => el.value = "");
   })
   .catch(() => alert("Error"));
 }
