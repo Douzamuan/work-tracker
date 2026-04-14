@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel</title>
+</head>
+
+<body style="font-family: Arial; background:#f4f6f9; text-align:center; padding:20px;">
+
+<div style="max-width:500px; margin:auto; background:white; padding:25px; border-radius:12px; box-shadow:0 0 15px rgba(0,0,0,0.1);">
+
+<h2>Admin Login</h2>
+
+<input type="email" id="adminEmail" placeholder="Admin Email" style="width:100%; padding:10px;"><br><br>
+
+<input type="password" id="adminPassword" placeholder="Password" style="width:100%; padding:10px;"><br><br>
+
+<button onclick="login()" style="width:100%; padding:12px; background:#007bff; color:white; border:none; border-radius:6px;">
+Login
+</button>
+
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" style="display:none; margin-top:30px;">
+
+<h2>Employee Work Data</h2>
+
+<table border="1" style="margin:auto; border-collapse:collapse;">
+<thead>
+<tr>
+<th>Name</th>
+<th>Email</th>
+<th>Date</th>
+<th>Hour</th>
+<th>Work</th>
+<th>Status</th>
+<th>Time</th>
+</tr>
+</thead>
+
+<tbody id="data"></tbody>
+
+</table>
+
+</div>
+
+<script>
+
+// 🔐 SET YOUR ADMIN LOGIN HERE
+const ADMIN_EMAIL = "davidthangchikim@gmail.com";
+const ADMIN_PASSWORD = "Chikim-khomni";
+
+// LOGIN FUNCTION
+function login() {
+  const email = document.getElementById("adminEmail").value;
+  const password = document.getElementById("adminPassword").value;
+
+  if(email === ADMIN_EMAIL && password === ADMIN_PASSWORD){
+    document.getElementById("dashboard").style.display = "block";
+    loadData();
+  } else {
+    alert("Invalid login");
+  }
+}
+
+// LOAD DATA FROM SHEET
+function loadData() {
+  fetch("https://script.google.com/macros/s/AKfycbxxRz-4hWe1ikSdNUudfDWv51ZoYJOg7fcrY18ZveK7aAUr6_xQnl_zDo3JLVb8Ex2lQw/exec")
+    .then(res => res.json())
+    .then(data => {
+      let rows = "";
+
+      data.forEach(item => {
+        rows += `
+          <tr>
+            <td>${item.name}</td>
+            <td>${item.email}</td>
+            <td>${item.date}</td>
+            <td>${item.hour}</td>
+            <td>${item.work}</td>
+            <td>${item.status}</td>
+            <td>${item.time}</td>
+          </tr>
+        `;
+      });
+
+      document.getElementById("data").innerHTML = rows;
+    });
+}
+
+</script>
+
+</body>
+</html>
