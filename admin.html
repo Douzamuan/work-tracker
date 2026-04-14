@@ -25,6 +25,9 @@ text-align:center;">
 
 <h2>Admin Login</h2>
 
+<input type="email" id="email" placeholder="Enter Email"
+style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc;">
+
 <input type="password" id="password" placeholder="Enter Password"
 style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc;">
 
@@ -84,22 +87,24 @@ z-index:-1;">
 </div>
 
 <script>
-const PASSWORD = "admin123"; // change this
+const ADMIN_EMAIL = "davidthangchikim@gmail.com";   // 🔴 change this
+const ADMIN_PASSWORD = "Chikim-khomni";       // 🔴 change this
 
 function login() {
-  const input = document.getElementById("password").value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-  if(input === PASSWORD){
+  if(email === ADMIN_EMAIL && password === ADMIN_PASSWORD){
     document.getElementById("loginBox").style.display = "none";
     document.getElementById("dashboard").style.display = "block";
     loadData();
   } else {
-    alert("Wrong password");
+    alert("Invalid email or password");
   }
 }
 
 function loadData() {
-  fetch("PASTE_YOUR_SCRIPT_URL_HERE")
+  fetch("https://script.google.com/macros/s/AKfycbxxRz-4hWe1ikSdNUudfDWv51ZoYJOg7fcrY18ZveK7aAUr6_xQnl_zDo3JLVb8Ex2lQw/exec")
     .then(res => res.json())
     .then(data => {
 
