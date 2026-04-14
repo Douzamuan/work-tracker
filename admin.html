@@ -7,47 +7,58 @@
 <body style="
 margin:0;
 font-family:Arial;
-background:url('https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png') no-repeat center;
-background-size:500px;
-background-color:#f4f6f9;
-padding:40px;
+background:#f4f6f9;
+overflow:auto;
 ">
+
+<!-- FIXED LOGO -->
+<div style="
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%, -50%);
+z-index:-1;
+opacity:0.15;">
+  <img src="https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png" width="500">
+</div>
+
+<div style="padding:30px;">
 
 <!-- LOGIN -->
 <div id="loginBox" style="max-width:400px; margin:auto; text-align:center;">
+  <h2>Admin Login</h2>
 
-<h2>Admin Login</h2>
+  <input type="email" id="email" placeholder="Enter Email"
+  style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc;">
 
-<input type="email" id="email" placeholder="Enter Email"
-style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc; background:white;">
+  <input type="password" id="password" placeholder="Enter Password"
+  style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc;">
 
-<input type="password" id="password" placeholder="Enter Password"
-style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc; background:white;">
-
-<button onclick="login()" style="
-width:100%;
-padding:12px;
-background:#007bff;
-color:white;
-border:none;
-border-radius:6px;
-margin-top:15px;">
-Login
-</button>
-
+  <button onclick="login()" style="
+  width:100%;
+  padding:12px;
+  background:#007bff;
+  color:white;
+  border:none;
+  border-radius:6px;
+  margin-top:15px;">
+  Login
+  </button>
 </div>
 
 <!-- DASHBOARD -->
-<div id="dashboard" style="display:none; margin-top:40px;">
+<div id="dashboard" style="display:none;">
 
 <h2 style="text-align:center;">Employee Work Data</h2>
 <h3 style="text-align:center;">Total Entries: <span id="count"></span></h3>
 
-<table border="1" style="
+<table style="
 width:100%;
 border-collapse:collapse;
-background:white;
-margin-top:20px;">
+margin-top:20px;
+background:rgba(255,255,255,0.6);
+backdrop-filter:blur(8px);">
+
 <thead>
 <tr>
 <th>Name</th>
@@ -65,9 +76,11 @@ margin-top:20px;">
 
 </div>
 
+</div>
+
 <script>
 const ADMIN_EMAIL = "davidthangchikim@gmail.com";
-const ADMIN_PASSWORD = "Chikim-khomni";
+const ADMIN_PASSWORD = "Chikim-khomhite";
 
 function login() {
   const email = document.getElementById("email").value;
@@ -77,6 +90,10 @@ function login() {
     document.getElementById("loginBox").style.display = "none";
     document.getElementById("dashboard").style.display = "block";
     loadData();
+
+    // 🔥 AUTO REFRESH EVERY 5 SECONDS
+    setInterval(loadData, 5000);
+
   } else {
     alert("Invalid login");
   }
