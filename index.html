@@ -4,15 +4,20 @@
   <title>Work Tracker</title>
 </head>
 
-<body style="font-family: Arial; padding:20px;">
+<body style="font-family: Arial; background:#f4f6f9; text-align:center; padding:20px;">
+
+<div style="max-width:400px; margin:auto; background:white; padding:25px; border-radius:12px; box-shadow:0 0 15px rgba(0,0,0,0.1);">
 
 <h2>Hourly Work Entry</h2>
+<p style="color:gray;">Track your work every hour</p>
 
-<input type="text" id="name" placeholder="Your Name"><br><br>
-<input type="email" id="email" placeholder="Your Email"><br><br>
-<input type="date" id="date"><br><br>
+<input type="text" id="name" placeholder="Your Name" style="width:100%; padding:10px;"><br><br>
 
-<select id="hour">
+<input type="email" id="email" placeholder="Your Email" style="width:100%; padding:10px;"><br><br>
+
+<input type="date" id="date" style="width:100%; padding:10px;"><br><br>
+
+<select id="hour" style="width:100%; padding:10px;">
   <option>9-10 AM</option>
   <option>10-11 AM</option>
   <option>11-12 PM</option>
@@ -23,17 +28,27 @@
   <option>4-5 PM</option>
 </select><br><br>
 
-<textarea id="work" placeholder="What are you doing?"></textarea><br><br>
+<textarea id="work" placeholder="What are you doing?" style="width:100%; padding:10px;"></textarea><br><br>
 
-<select id="status">
+<select id="status" style="width:100%; padding:10px;">
   <option>Pending</option>
   <option>Completed</option>
 </select><br><br>
 
-<button onclick="submitData()">Submit</button>
+<button onclick="submitData()" style="width:100%; padding:12px; background:#007bff; color:white; border:none; border-radius:6px;">
+  Submit
+</button>
+
+</div>
+
+<!-- Watermark Logo -->
+<div style="position:fixed; bottom:10px; width:100%; text-align:center; opacity:0.2;">
+  <img src="https://via.placeholder.com/150" height="40">
+</div>
 
 <script>
 function submitData() {
+
   const data = {
     name: document.getElementById("name").value,
     email: document.getElementById("email").value,
@@ -48,7 +63,15 @@ function submitData() {
     body: JSON.stringify(data)
   })
   .then(res => res.text())
-  .then(() => alert("Submitted Successfully"))
+  .then(() => {
+    alert("Submitted Successfully");
+
+    // CLEAR FORM AFTER SUBMIT
+    document.getElementById("name").value = "";
+    document.getElementById("email").value = "";
+    document.getElementById("date").value = "";
+    document.getElementById("work").value = "";
+  })
   .catch(() => alert("Error"));
 }
 </script>
