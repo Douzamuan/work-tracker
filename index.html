@@ -7,10 +7,19 @@
 <body style="
 margin:0;
 font-family:Arial;
-background:url('https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png') no-repeat center;
-background-size:500px;
-background-color:#f4f6f9;
+background:#f4f6f9;
 ">
+
+<!-- FIXED LOGO -->
+<div style="
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%, -50%);
+z-index:-1;
+opacity:0.15;">
+  <img src="https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png" width="500">
+</div>
 
 <div style="
 max-width:500px;
@@ -21,16 +30,16 @@ padding:20px;">
 <p style="text-align:center; color:gray;">Track your work every hour</p>
 
 <input id="name" placeholder="Your Name"
-style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc; background:rgba(255,255,255,0.9);">
+style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc; background:white;">
 
 <input id="email" type="email" placeholder="Your Email"
-style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc; background:rgba(255,255,255,0.9);">
+style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc; background:white;">
 
 <input id="date" type="date"
-style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc; background:rgba(255,255,255,0.9);">
+style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc; background:white;">
 
 <select id="hour"
-style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc; background:rgba(255,255,255,0.9);">
+style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc; background:white;">
   <option>9-10 AM</option>
   <option>10-11 AM</option>
   <option>11-12 PM</option>
@@ -42,10 +51,10 @@ style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px 
 </select>
 
 <textarea id="work" placeholder="What are you doing?"
-style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc; background:rgba(255,255,255,0.9);"></textarea>
+style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc; background:white;"></textarea>
 
 <select id="status"
-style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc; background:rgba(255,255,255,0.9);">
+style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc; background:white;">
   <option>Pending</option>
   <option>Completed</option>
 </select>
