@@ -7,34 +7,30 @@
 <body style="
 margin:0;
 font-family:Arial;
-background:#f4f6f9;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;">
+background:url('https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png') no-repeat center;
+background-size:500px;
+background-color:#f4f6f9;
+">
 
 <div style="
-width:100%;
-max-width:450px;
-background:white;
-padding:30px;
-border-radius:12px;
-box-shadow:0 10px 30px rgba(0,0,0,0.1);">
+max-width:500px;
+margin:80px auto;
+padding:20px;">
 
 <h2 style="text-align:center;">Hourly Work Entry</h2>
 <p style="text-align:center; color:gray;">Track your work every hour</p>
 
 <input id="name" placeholder="Your Name"
-style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc;">
+style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc; background:rgba(255,255,255,0.9);">
 
 <input id="email" type="email" placeholder="Your Email"
-style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc;">
+style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc; background:rgba(255,255,255,0.9);">
 
 <input id="date" type="date"
-style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc;">
+style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc; background:rgba(255,255,255,0.9);">
 
 <select id="hour"
-style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc;">
+style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc; background:rgba(255,255,255,0.9);">
   <option>9-10 AM</option>
   <option>10-11 AM</option>
   <option>11-12 PM</option>
@@ -46,10 +42,10 @@ style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px 
 </select>
 
 <textarea id="work" placeholder="What are you doing?"
-style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc;"></textarea>
+style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc; background:rgba(255,255,255,0.9);"></textarea>
 
 <select id="status"
-style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc;">
+style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc; background:rgba(255,255,255,0.9);">
   <option>Pending</option>
   <option>Completed</option>
 </select>
@@ -67,17 +63,6 @@ Submit
 
 </div>
 
-<!-- WATERMARK -->
-<div style="
-position:fixed;
-top:50%;
-left:50%;
-transform:translate(-50%, -50%);
-opacity:0.04;
-z-index:-1;">
-  <img src="https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png" width="500">
-</div>
-
 <script>
 function submitData() {
   const data = {
@@ -93,13 +78,10 @@ function submitData() {
     method: "POST",
     body: JSON.stringify(data)
   })
-  .then(res => res.text())
   .then(() => {
     alert("Submitted Successfully");
-
     document.querySelectorAll("input, textarea").forEach(el => el.value = "");
-  })
-  .catch(() => alert("Error"));
+  });
 }
 </script>
 
