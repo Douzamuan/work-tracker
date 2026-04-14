@@ -4,28 +4,55 @@
   <title>Admin Panel</title>
 </head>
 
-<body style="font-family: Arial; background:#f4f6f9; text-align:center; padding:20px;">
+<body style="
+margin:0;
+font-family:Arial;
+background:#f4f6f9;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;">
 
-<div style="max-width:500px; margin:auto; background:white; padding:25px; border-radius:12px; box-shadow:0 0 15px rgba(0,0,0,0.1);">
+<div style="width:100%; max-width:900px;">
+
+<!-- LOGIN -->
+<div id="loginBox" style="
+background:white;
+padding:30px;
+border-radius:12px;
+box-shadow:0 10px 30px rgba(0,0,0,0.1);
+text-align:center;">
 
 <h2>Admin Login</h2>
 
-<input type="email" id="adminEmail" placeholder="Admin Email" style="width:100%; padding:10px;"><br><br>
+<input type="password" id="password" placeholder="Enter Password"
+style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc;">
 
-<input type="password" id="adminPassword" placeholder="Password" style="width:100%; padding:10px;"><br><br>
-
-<button onclick="login()" style="width:100%; padding:12px; background:#007bff; color:white; border:none; border-radius:6px;">
+<button onclick="login()" style="
+width:100%;
+padding:12px;
+background:#007bff;
+color:white;
+border:none;
+border-radius:6px;
+margin-top:15px;">
 Login
 </button>
 
 </div>
 
 <!-- DASHBOARD -->
-<div id="dashboard" style="display:none; margin-top:30px;">
+<div id="dashboard" style="
+display:none;
+background:white;
+padding:20px;
+border-radius:12px;
+box-shadow:0 10px 30px rgba(0,0,0,0.1);">
 
-<h2>Employee Work Data</h2>
+<h2 style="text-align:center;">Employee Work Data</h2>
+<h3 style="text-align:center;">Total Entries: <span id="count"></span></h3>
 
-<table border="1" style="margin:auto; border-collapse:collapse;">
+<table border="1" style="width:100%; border-collapse:collapse; margin-top:20px;">
 <thead>
 <tr>
 <th>Name</th>
@@ -39,55 +66,62 @@ Login
 </thead>
 
 <tbody id="data"></tbody>
-
 </table>
 
 </div>
 
+</div>
+
+<!-- WATERMARK -->
+<div style="
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%, -50%);
+opacity:0.04;
+z-index:-1;">
+  <img src="https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png" width="500">
+</div>
+
 <script>
+const PASSWORD = "admin123"; // change this
 
-// 🔐 SET YOUR ADMIN LOGIN HERE
-const ADMIN_EMAIL = "davidthangchikim@gmail.com";
-const ADMIN_PASSWORD = "Chikim-khomni";
-
-// LOGIN FUNCTION
 function login() {
-  const email = document.getElementById("adminEmail").value;
-  const password = document.getElementById("adminPassword").value;
+  const input = document.getElementById("password").value;
 
-  if(email === ADMIN_EMAIL && password === ADMIN_PASSWORD){
+  if(input === PASSWORD){
+    document.getElementById("loginBox").style.display = "none";
     document.getElementById("dashboard").style.display = "block";
     loadData();
   } else {
-    alert("Invalid login");
+    alert("Wrong password");
   }
 }
 
-// LOAD DATA FROM SHEET
 function loadData() {
-  fetch("https://script.google.com/macros/s/AKfycbxxRz-4hWe1ikSdNUudfDWv51ZoYJOg7fcrY18ZveK7aAUr6_xQnl_zDo3JLVb8Ex2lQw/exec")
+  fetch("PASTE_YOUR_SCRIPT_URL_HERE")
     .then(res => res.json())
     .then(data => {
-      let rows = "";
 
+      document.getElementById("count").innerText = data.length;
+
+      let rows = "";
       data.forEach(item => {
         rows += `
-          <tr>
-            <td>${item.name}</td>
-            <td>${item.email}</td>
-            <td>${item.date}</td>
-            <td>${item.hour}</td>
-            <td>${item.work}</td>
-            <td>${item.status}</td>
-            <td>${item.time}</td>
-          </tr>
-        `;
+        <tr>
+          <td>${item.name}</td>
+          <td>${item.email}</td>
+          <td>${item.date}</td>
+          <td>${item.hour}</td>
+          <td>${item.work}</td>
+          <td>${item.status}</td>
+          <td>${item.time}</td>
+        </tr>`;
       });
 
       document.getElementById("data").innerHTML = rows;
     });
 }
-
 </script>
 
 </body>
