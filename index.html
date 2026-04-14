@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Work Tracker</title>
+</head>
+
+<body style="font-family: Arial; padding:20px;">
+
+<h2>Hourly Work Entry</h2>
+
+<input type="text" id="name" placeholder="Your Name"><br><br>
+<input type="email" id="email" placeholder="Your Email"><br><br>
+<input type="date" id="date"><br><br>
+
+<select id="hour">
+  <option>9-10 AM</option>
+  <option>10-11 AM</option>
+  <option>11-12 PM</option>
+  <option>12-1 PM</option>
+  <option>1-2 PM</option>
+  <option>2-3 PM</option>
+  <option>3-4 PM</option>
+  <option>4-5 PM</option>
+</select><br><br>
+
+<textarea id="work" placeholder="What are you doing?"></textarea><br><br>
+
+<select id="status">
+  <option>Pending</option>
+  <option>Completed</option>
+</select><br><br>
+
+<button onclick="submitData()">Submit</button>
+
+<script>
+function submitData() {
+  const data = {
+    name: document.getElementById("name").value,
+    email: document.getElementById("email").value,
+    date: document.getElementById("date").value,
+    hour: document.getElementById("hour").value,
+    work: document.getElementById("work").value,
+    status: document.getElementById("status").value
+  };
+
+  fetch("https://script.google.com/macros/s/AKfycbxxRz-4hWe1ikSdNUudfDWv51ZoYJOg7fcrY18ZveK7aAUr6_xQnl_zDo3JLVb8Ex2lQw/exec", {
+    method: "POST",
+    body: JSON.stringify(data)
+  })
+  .then(res => res.text())
+  .then(() => alert("Submitted Successfully"))
+  .catch(() => alert("Error"));
+}
+</script>
+
+</body>
+</html>
