@@ -36,14 +36,20 @@
 </select><br><br>
 
 <button onclick="submitData()" style="width:100%; padding:12px; background:#007bff; color:white; border:none; border-radius:6px;">
-  Submit
+Submit
 </button>
 
 </div>
 
-<!-- Watermark Logo -->
-<div style="position:fixed; bottom:10px; width:100%; text-align:center; opacity:0.2;">
-  <img src="https://via.placeholder.com/150" height="40">
+<!-- CENTER WATERMARK -->
+<div style="
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%, -50%);
+opacity:0.05;
+z-index:-1;">
+  <img src="https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png" width="300">
 </div>
 
 <script>
@@ -66,7 +72,6 @@ function submitData() {
   .then(() => {
     alert("Submitted Successfully");
 
-    // CLEAR FORM AFTER SUBMIT
     document.getElementById("name").value = "";
     document.getElementById("email").value = "";
     document.getElementById("date").value = "";
