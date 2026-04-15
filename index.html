@@ -1,104 +1,88 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Employee Schedule</title>
+  <title>Employee Schedule</title>
 </head>
 
-<body style="margin:0; font-family:Arial;">
+<body style="margin:0;font-family:Arial;background:#f4f6f9;">
 
 <!-- FIXED LOGO -->
-<div style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); opacity:0.1; z-index:-1;">
-<img src="https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png" width="500">
+<div style="
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%, -50%);
+opacity:0.08;
+z-index:-1;">
+<img src="https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png" width="400">
 </div>
 
-<div style="padding:20px;">
+<div style="max-width:500px;margin:60px auto;padding:20px;">
 
-<h2>Employee Schedule</h2>
+<h2 style="text-align:center;">Employee Schedule</h2>
 
-<input id="name" placeholder="Your Name" required>
-<input id="date" type="date" required>
+<input id="name" placeholder="Your Name"
+style="width:100%;padding:12px;margin-top:10px;border-radius:6px;border:1px solid #ccc;">
 
-<input id="start" placeholder="Start (9 AM)" required>
-<input id="end" placeholder="End (4 PM)" required>
+<input id="date" type="date"
+style="width:100%;padding:12px;margin-top:10px;border-radius:6px;border:1px solid #ccc;">
 
-<textarea id="work" placeholder="Work" required></textarea>
+<input id="start" placeholder="Start Time (e.g. 9 AM)"
+style="width:100%;padding:12px;margin-top:10px;border-radius:6px;border:1px solid #ccc;">
 
-<button onclick="submitData()">Submit</button>
+<input id="end" placeholder="End Time (e.g. 2 PM)"
+style="width:100%;padding:12px;margin-top:10px;border-radius:6px;border:1px solid #ccc;">
 
-<h3>Your Weekly Grid</h3>
+<input id="work" placeholder="Work (Office / Sales / Meeting)"
+style="width:100%;padding:12px;margin-top:10px;border-radius:6px;border:1px solid #ccc;">
 
-<table border="1" style="width:100%; background:rgba(255,255,255,0.4);">
-<thead>
-<tr>
-<th>TIME</th>
-<th>MON</th>
-<th>TUE</th>
-<th>WED</th>
-<th>THU</th>
-<th>FRI</th>
-</tr>
-</thead>
-
-<tbody id="grid"></tbody>
-</table>
+<button onclick="submitData()" style="
+width:100%;
+padding:12px;
+background:#007bff;
+color:white;
+border:none;
+border-radius:6px;
+margin-top:15px;">
+Submit
+</button>
 
 </div>
 
 <script>
-const URL = "https://script.google.com/macros/s/AKfycbxBfGAQzxtF3HrG-vW6kETljk1B3bnVlEp6G8FLiPYr_Oh7_Z-86qAVd0m6AKnI0qlF_A/exec";
-
 function submitData(){
-  const data = {
-    name:name.value,
-    date:date.value,
-    start:start.value,
-    end:end.value,
-    work:work.value
-  };
+  const name = document.getElementById("name").value.trim();
+  const date = document.getElementById("date").value;
+  const start = document.getElementById("start").value.trim();
+  const end = document.getElementById("end").value.trim();
+  const work = document.getElementById("work").value.trim();
 
-  if(!data.name || !data.date || !data.start || !data.end || !data.work){
-    alert("Fill all fields");
+  // ✅ FIXED VALIDATION
+  if(!name || !date || !start || !end || !work){
+    alert("Please fill all fields properly");
     return;
   }
 
-  fetch(URL,{
+  const data = {
+    name,
+    date,
+    time: start + " - " + end,
+    work,
+    status: "Pending"
+  };
+
+  fetch("https://script.google.com/macros/s/AKfycbxBfGAQzxtF3HrG-vW6kETljk1B3bnVlEp6G8FLiPYr_Oh7_Z-86qAVd0m6AKnI0qlF_A/execPASTE_SCRIPT_URL", {
     method:"POST",
-    body:JSON.stringify(data)
+    body: JSON.stringify(data)
   })
-  .then(r=>r.text())
-  .then(res=>{
-    alert(res);
-    loadGrid();
-  });
-}
+  .then(()=>{
+    alert("Submitted Successfully");
 
-function getDay(date){
-  return ["SUN","MON","TUE","WED","THU","FRI","SAT"][new Date(date).getDay()];
-}
-
-function loadGrid(){
-  fetch(URL)
-  .then(r=>r.json())
-  .then(data=>{
-    let html="";
-
-    for(let h=9; h<17; h++){
-      html += "<tr><td>"+h+":00</td>";
-
-      ["MON","TUE","WED","THU","FRI"].forEach(day=>{
-        const entry = data.find(d =>
-          d.name === name.value &&
-          d.start === h &&
-          getDay(d.date) === day
-        );
-
-        html += `<td>${entry ? entry.work : ""}</td>`;
-      });
-
-      html += "</tr>";
-    }
-
-    grid.innerHTML = html;
+    document.getElementById("name").value="";
+    document.getElementById("date").value="";
+    document.getElementById("start").value="";
+    document.getElementById("end").value="";
+    document.getElementById("work").value="";
   });
 }
 </script>
