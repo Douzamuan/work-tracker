@@ -1,14 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Work Tracker</title>
+  <title>Weekly Work Entry</title>
 </head>
 
-<body style="
-margin:0;
-font-family:Arial;
-background:#f4f6f9;
-">
+<body style="margin:0;font-family:Arial;background:#f4f6f9;">
 
 <!-- FIXED LOGO -->
 <div style="
@@ -16,80 +12,48 @@ position:fixed;
 top:50%;
 left:50%;
 transform:translate(-50%, -50%);
-z-index:-1;
-opacity:0.15;">
-  <img src="https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png" width="500">
+opacity:0.1;
+z-index:-1;">
+<img src="https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png" width="500">
 </div>
 
-<div style="
-max-width:500px;
-margin:80px auto;
-padding:20px;">
+<div style="max-width:500px;margin:80px auto;padding:20px;">
 
-<h2 style="text-align:center;">Hourly Work Entry</h2>
-<p style="text-align:center; color:gray;">Track your work every hour</p>
+<h2 style="text-align:center;">Work Entry</h2>
 
-<input id="name" placeholder="Your Name"
-style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc; background:white;">
+<input id="name" placeholder="Your Name" required style="width:100%;padding:12px;margin-top:10px;">
+<input id="date" type="date" required style="width:100%;padding:12px;margin-top:10px;">
+<input id="time" placeholder="9 AM - 12 PM" required style="width:100%;padding:12px;margin-top:10px;">
+<textarea id="work" placeholder="Work details" required style="width:100%;padding:12px;margin-top:10px;"></textarea>
 
-<input id="email" type="email" placeholder="Your Email"
-style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc; background:white;">
-
-<input id="date" type="date"
-style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc; background:white;">
-
-<select id="hour"
-style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc; background:white;">
-  <option>9-10 AM</option>
-  <option>10-11 AM</option>
-  <option>11-12 PM</option>
-  <option>12-1 PM</option>
-  <option>1-2 PM</option>
-  <option>2-3 PM</option>
-  <option>3-4 PM</option>
-  <option>4-5 PM</option>
-</select>
-
-<textarea id="work" placeholder="What are you doing?"
-style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc; background:white;"></textarea>
-
-<select id="status"
-style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc; background:white;">
-  <option>Pending</option>
-  <option>Completed</option>
-</select>
-
-<button onclick="submitData()" style="
-width:100%;
-padding:12px;
-background:#007bff;
-color:white;
-border:none;
-border-radius:6px;
-margin-top:15px;">
+<button onclick="submitData()" style="width:100%;padding:12px;margin-top:15px;background:#007bff;color:white;border:none;">
 Submit
 </button>
 
 </div>
 
 <script>
-function submitData() {
+function submitData(){
   const data = {
     name: document.getElementById("name").value,
-    email: document.getElementById("email").value,
     date: document.getElementById("date").value,
-    hour: document.getElementById("hour").value,
+    time: document.getElementById("time").value,
     work: document.getElementById("work").value,
-    status: document.getElementById("status").value
+    status: "Pending"
   };
 
+  if(!data.name || !data.date || !data.time || !data.work){
+    alert("Fill all fields");
+    return;
+  }
+
   fetch("https://script.google.com/macros/s/AKfycbxxRz-4hWe1ikSdNUudfDWv51ZoYJOg7fcrY18ZveK7aAUr6_xQnl_zDo3JLVb8Ex2lQw/exec", {
-    method: "POST",
+    method:"POST",
     body: JSON.stringify(data)
   })
-  .then(() => {
-    alert("Submitted Successfully");
-    document.querySelectorAll("input, textarea").forEach(el => el.value = "");
+  .then(()=> {
+    alert("Submitted");
+    document.querySelectorAll("input, textarea").forEach(el => el.value="");
   });
 }
 </script>
