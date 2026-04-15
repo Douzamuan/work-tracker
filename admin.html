@@ -1,30 +1,63 @@
-<!-- admin.html -->
 <!DOCTYPE html>
 <html>
 <head>
-<title>Admin</title>
+<title>Admin Weekly Dashboard</title>
 </head>
 
-<body>
+<body style="margin:0; font-family:Arial; background:#f4f6f9;">
 
-<h2>Admin Panel</h2>
+<!-- 🔥 FIXED CENTER LOGO -->
+<div style="
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%, -50%);
+opacity:0.1;
+z-index:-1;">
+<img src="https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png" width="500">
+</div>
 
-<input id="password" placeholder="Password">
+<div style="padding:20px;">
+
+<!-- 🔐 LOGIN -->
+<div id="loginBox" style="text-align:center;">
+<h2>Admin Login</h2>
+<input id="password" placeholder="Password"
+style="padding:10px; width:200px;">
+<br><br>
 <button onclick="login()">Login</button>
+</div>
 
-<div id="panel" style="display:none">
+<!-- 📊 DASHBOARD -->
+<div id="dashboard" style="display:none;">
+
+<h2 style="text-align:center;">Weekly Work Schedule</h2>
 
 <select id="employee" onchange="loadGrid()"></select>
 
-<table border="1">
+<table border="1" style="
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+background:rgba(255,255,255,0.4);
+backdrop-filter:blur(5px);">
+
 <thead>
-<tr>
-<th>Time</th>
-<th>Work</th>
+<tr style="background:#2f5d50; color:white;">
+<th>TIME</th>
+<th>MONDAY</th>
+<th>TUESDAY</th>
+<th>WEDNESDAY</th>
+<th>THURSDAY</th>
+<th>FRIDAY</th>
 </tr>
 </thead>
+
 <tbody id="grid"></tbody>
+
 </table>
+
+</div>
 
 </div>
 
@@ -34,8 +67,12 @@ const PASS = "Chikim-khomhite";
 
 function login(){
   if(password.value === PASS){
-    panel.style.display="block";
+    loginBox.style.display="none";
+    dashboard.style.display="block";
     loadEmployees();
+    setInterval(loadGrid, 5000);
+  } else {
+    alert("Wrong password");
   }
 }
 
@@ -49,31 +86,72 @@ function loadEmployees(){
   });
 }
 
+function getDayName(dateStr){
+  const d = new Date(dateStr);
+  return ["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY"][d.getDay()];
+}
+
+function getColor(work){
+  work = work.toLowerCase();
+
+  if(work.includes("office")) return "#f7d774";
+  if(work.includes("sales")) return "#2ecc71";
+  if(work.includes("meeting")) return "#3498db";
+
+  return "#ccc";
+}
+
 function loadGrid(){
   fetch(URL)
   .then(r=>r.json())
   .then(data=>{
+
     const emp = employee.value;
 
-    let html="";
+    let html = "";
 
-    for(let h=9;h<17;h++){
-      const found = data.find(d => d.name===emp && d.start===h);
+    for(let h=9; h<17; h++){
 
-      let work = found ? found.work : "";
+      html += `<tr>
+        <td>${formatHour(h)}</td>`;
 
-      let color = work.includes("Office") ? "yellow" :
-                  work.includes("Sales") ? "green" : "";
+      ["MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY"].forEach(day=>{
 
-      html += `
-      <tr>
-        <td>${h}:00 - ${h+1}:00</td>
-        <td style="background:${color}">${work}</td>
-      </tr>`;
+        const entry = data.find(d =>
+          d.name === emp &&
+          d.start === h &&
+          getDayName(d.date) === day
+        );
+
+        if(entry){
+          const color = getColor(entry.work);
+          html += `<td style="background:${color}; color:black; font-weight:bold;">
+                    ${entry.work}
+                  </td>`;
+        } else {
+          html += `<td></td>`;
+        }
+
+      });
+
+      html += `</tr>`;
     }
 
     grid.innerHTML = html;
   });
+}
+
+function formatHour(h){
+  let start = h;
+  let end = h+1;
+
+  return `${convert(start)} - ${convert(end)}`;
+}
+
+function convert(h){
+  let ampm = h >= 12 ? "PM" : "AM";
+  let hour = h % 12 || 12;
+  return hour + ":00 " + ampm;
 }
 </script>
 
