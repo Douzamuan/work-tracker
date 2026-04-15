@@ -1,127 +1,79 @@
+<!-- admin.html -->
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Admin Panel</title>
+<title>Admin</title>
 </head>
 
-<body style="
-margin:0;
-font-family:Arial;
-background:#f4f6f9;
-overflow:auto;
-">
+<body>
 
-<!-- FIXED LOGO -->
-<div style="
-position:fixed;
-top:50%;
-left:50%;
-transform:translate(-50%, -50%);
-z-index:-1;
-opacity:0.15;">
-  <img src="https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png" width="500">
-</div>
+<h2>Admin Panel</h2>
 
-<div style="padding:30px;">
+<input id="password" placeholder="Password">
+<button onclick="login()">Login</button>
 
-<!-- LOGIN -->
-<div id="loginBox" style="max-width:400px; margin:auto; text-align:center;">
-  <h2>Admin Login</h2>
+<div id="panel" style="display:none">
 
-  <input type="email" id="email" placeholder="Enter Email"
-  style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc;">
+<select id="employee" onchange="loadGrid()"></select>
 
-  <input type="password" id="password" placeholder="Enter Password"
-  style="width:100%; padding:12px; margin-top:10px; border-radius:6px; border:1px solid #ccc;">
-
-  <button onclick="login()" style="
-  width:100%;
-  padding:12px;
-  background:#007bff;
-  color:white;
-  border:none;
-  border-radius:6px;
-  margin-top:15px;">
-  Login
-  </button>
-</div>
-
-<!-- DASHBOARD -->
-<div id="dashboard" style="display:none;">
-
-<h2 style="text-align:center;">Employee Work Data</h2>
-<h3 style="text-align:center;">Total Entries: <span id="count"></span></h3>
-
-<table style="
-width:100%;
-border-collapse:collapse;
-margin-top:20px;
-background:rgba(255,255,255,0.6);
-backdrop-filter:blur(8px);">
-
+<table border="1">
 <thead>
 <tr>
-<th>Name</th>
-<th>Email</th>
-<th>Date</th>
-<th>Hour</th>
-<th>Work</th>
-<th>Status</th>
 <th>Time</th>
+<th>Work</th>
 </tr>
 </thead>
-
-<tbody id="data"></tbody>
+<tbody id="grid"></tbody>
 </table>
 
 </div>
 
-</div>
-
 <script>
-const ADMIN_EMAIL = "davidthangchikim@gmail.com";
-const ADMIN_PASSWORD = "Chikim-khomhite";
+const URL = "https://script.google.com/macros/s/AKfycbxxRz-4hWe1ikSdNUudfDWv51ZoYJOg7fcrY18ZveK7aAUr6_xQnl_zDo3JLVb8Ex2lQw/exec";
+const PASS = "Chikim-khomhite";
 
-function login() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
-  if(email === ADMIN_EMAIL && password === ADMIN_PASSWORD){
-    document.getElementById("loginBox").style.display = "none";
-    document.getElementById("dashboard").style.display = "block";
-    loadData();
-
-    // 🔥 AUTO REFRESH EVERY 5 SECONDS
-    setInterval(loadData, 5000);
-
-  } else {
-    alert("Invalid login");
+function login(){
+  if(password.value === PASS){
+    panel.style.display="block";
+    loadEmployees();
   }
 }
 
-function loadData() {
-  fetch("https://script.google.com/macros/s/AKfycbxxRz-4hWe1ikSdNUudfDWv51ZoYJOg7fcrY18ZveK7aAUr6_xQnl_zDo3JLVb8Ex2lQw/exec")
-    .then(res => res.json())
-    .then(data => {
+function loadEmployees(){
+  fetch(URL)
+  .then(r=>r.json())
+  .then(data=>{
+    const names = [...new Set(data.map(d=>d.name))];
+    employee.innerHTML = names.map(n=>`<option>${n}</option>`).join("");
+    loadGrid();
+  });
+}
 
-      document.getElementById("count").innerText = data.length;
+function loadGrid(){
+  fetch(URL)
+  .then(r=>r.json())
+  .then(data=>{
+    const emp = employee.value;
 
-      let rows = "";
-      data.forEach(item => {
-        rows += `
-        <tr>
-          <td>${item.name}</td>
-          <td>${item.email}</td>
-          <td>${item.date}</td>
-          <td>${item.hour}</td>
-          <td>${item.work}</td>
-          <td>${item.status}</td>
-          <td>${item.time}</td>
-        </tr>`;
-      });
+    let html="";
 
-      document.getElementById("data").innerHTML = rows;
-    });
+    for(let h=9;h<17;h++){
+      const found = data.find(d => d.name===emp && d.start===h);
+
+      let work = found ? found.work : "";
+
+      let color = work.includes("Office") ? "yellow" :
+                  work.includes("Sales") ? "green" : "";
+
+      html += `
+      <tr>
+        <td>${h}:00 - ${h+1}:00</td>
+        <td style="background:${color}">${work}</td>
+      </tr>`;
+    }
+
+    grid.innerHTML = html;
+  });
 }
 </script>
 
