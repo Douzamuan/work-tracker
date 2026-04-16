@@ -1,19 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Admin Dashboard</title>
+<title>Weekly Work Schedule</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 body {
-  background: url('logo.png') no-repeat center fixed;
-  background-size: 200px;
+  font-family: Arial;
+  background: url('https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png') no-repeat center fixed;
+  background-size: 220px;
 }
 
-.glass {
-  background: rgba(255,255,255,0.75);
+.container {
+  background: rgba(255,255,255,0.9);
+  margin: 20px;
   padding: 20px;
-  margin: 30px;
+  border-radius: 12px;
+}
+
+th {
+  background: #3f2b96;
+  color: white;
+  padding: 10px;
+}
+
+td {
+  padding: 10px;
+  text-align: center;
+  background: rgba(255,255,255,0.7);
+}
+
+.time {
+  background: #9ec49a;
+  font-weight: bold;
 }
 
 table {
@@ -21,95 +40,110 @@ table {
   border-collapse: collapse;
 }
 
-td, th {
+input, button {
+  width: 100%;
   padding: 10px;
-  text-align: center;
-  border: 1px solid #ccc;
+  margin-top: 10px;
 }
 
-th {
+button {
   background: #3f2b96;
   color: white;
+  border: none;
 }
 </style>
 </head>
 
 <body>
 
-<div id="login" class="glass">
-<h2>Admin Login</h2>
-<input type="password" id="pass">
-<button onclick="login()">Login</button>
+<!-- LOGIN -->
+<div id="loginBox" class="container" style="max-width:300px;margin:auto;margin-top:100px;">
+  <h2>Admin Login</h2>
+  <input type="password" id="adminPass" placeholder="Enter Password">
+  <button onclick="handleLogin()">Login</button>
 </div>
 
-<div id="panel" style="display:none" class="glass">
-<h2>Weekly Work Schedule</h2>
+<!-- PANEL -->
+<div id="adminPanel" class="container" style="display:none;">
+  <h2>WEEKLY WORK SCHEDULE</h2>
 
-<select id="mode" onchange="load()">
-<option value="day">Day</option>
-<option value="week">Week</option>
-<option value="month">Month</option>
-</select>
+  <div id="grid"></div>
 
-<div id="grid"></div>
-
-<canvas id="bar"></canvas>
+  <h3>Overall Work</h3>
+  <canvas id="chart"></canvas>
 </div>
 
 <script>
 const URL = "https://script.google.com/macros/s/AKfycbzgW83D5h0KmIf2kQI1F9Le3Ux4Xg8EW5smijMbdTj5F5L_B7f_yVIXJn8OPaA1r4Uqkg/exec";
-const PASS = "Chikim-khomhite";
+const PASSWORD = "Chikim-khomhite";
 
-function login() {
-  if (pass.value === PASS) {
-    login.style.display = "none";
-    panel.style.display = "block";
-    load();
+function handleLogin() {
+  const entered = document.getElementById("adminPass").value.trim();
+
+  if (entered === PASSWORD) {
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("adminPanel").style.display = "block";
+    loadAdmin();
   } else {
     alert("Wrong password");
   }
 }
 
-function load() {
-  fetch(URL).then(r => r.json()).then(data => {
-    let employees = [...new Set(data.slice(1).map(r => r[1]))];
+function loadAdmin() {
+  fetch(URL)
+    .then(res => res.json())
+    .then(data => {
 
-    let html = "<table><tr><th>Time</th>";
+      const rows = data.slice(1);
+      const employees = [...new Set(rows.map(r => r[1]))];
 
-    employees.forEach(e => html += `<th>${e}</th>`);
-    html += "</tr>";
+      let html = "<table><tr><th>Time</th>";
 
-    for (let i = 9; i <= 17; i++) {
-      html += `<tr><td>${i}:00</td>`;
-
-      employees.forEach(emp => {
-        let found = data.find(r =>
-          r[1] === emp &&
-          parseInt(r[2]) <= i &&
-          parseInt(r[3]) > i
-        );
-
-        html += `<td>${found ? found[4] : ""}</td>`;
-      });
-
+      employees.forEach(e => html += `<th>${e}</th>`);
       html += "</tr>";
-    }
 
-    html += "</table>";
-    grid.innerHTML = html;
+      for (let i = 9; i <= 17; i++) {
+        html += `<tr><td class="time">${formatTime(i)}</td>`;
 
-    let count = {};
-    data.slice(1).forEach(r => {
-      count[r[1]] = (count[r[1]] || 0) + 1;
-    });
+        employees.forEach(emp => {
+          let found = rows.find(r =>
+            r[1] === emp &&
+            parseInt(r[2]) <= i &&
+            parseInt(r[3]) > i
+          );
 
-    new Chart(bar, {
-      type: 'bar',
-      data: {
-        labels: Object.keys(count),
-        datasets: [{ data: Object.values(count) }]
+          html += `<td>${found ? found[4] : ""}</td>`;
+        });
+
+        html += "</tr>";
       }
+
+      html += "</table>";
+      document.getElementById("grid").innerHTML = html;
+
+      generateChart(rows);
     });
+}
+
+function formatTime(h) {
+  let ampm = h >= 12 ? "PM" : "AM";
+  let hour = h > 12 ? h - 12 : h;
+  return `${hour}:00 ${ampm}`;
+}
+
+function generateChart(rows) {
+  let count = {};
+
+  rows.forEach(r => {
+    count[r[1]] = (count[r[1]] || 0) + 1;
+  });
+
+  new Chart(document.getElementById("chart"), {
+    type: 'bar',
+    data: {
+      labels: Object.keys(count),
+      datasets: [{ data: Object.values(count) }]
+    }
   });
 }
 </script>
