@@ -5,48 +5,55 @@
 
   <style>
     body {
-      font-family: Arial;
+      font-family: "Segoe UI";
+      background: #f4f6f9;
       text-align: center;
-
-      /* 🖼 LOGO BACKGROUND */
-      background: url("https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png") no-repeat center center fixed;
-      background-size: 300px;
-      background-color: #f5f6fa;
     }
 
-    .overlay {
-      background: rgba(255,255,255,0.9);
-      min-height: 100vh;
-      padding-top: 50px;
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: url("https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png") no-repeat center;
+      background-size: 250px;
+      opacity: 0.05;
     }
 
-    .box {
+    .card {
       background: white;
-      padding: 20px;
+      padding: 25px;
       width: 320px;
-      margin: auto;
-      border-radius: 10px;
+      margin: 80px auto;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      position: relative;
+      z-index: 1;
     }
 
     input, select, button {
       width: 100%;
       padding: 10px;
       margin: 8px 0;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
     }
   </style>
 </head>
 
 <body>
 
-<div class="overlay">
-
-<div class="box">
-  <h2>Submit Work</h2>
+<div class="card">
+  <h2>📝 Submit Work</h2>
 
   <input type="date" id="date">
   <input type="text" id="employee" placeholder="Your Name">
-
-  <input type="text" id="task" placeholder="Task (e.g. Office Work)">
+  <input type="text" id="task" placeholder="Task">
 
   <select id="start"></select>
   <select id="end"></select>
@@ -54,32 +61,36 @@
   <button onclick="submit()">Submit</button>
 </div>
 
-</div>
-
 <script>
-// TIME DROPDOWN
+const start = document.getElementById("start");
+const end = document.getElementById("end");
+
 for (let i = 9; i <= 17; i++) {
   const val = (i < 10 ? "0" : "") + i + ":00";
-  start.innerHTML += `<option>${val}</option>`;
-  end.innerHTML += `<option>${val}</option>`;
+  start.innerHTML += `<option value="${i}">${val}</option>`;
+  end.innerHTML += `<option value="${i}">${val}</option>`;
 }
 
-// DEFAULT DATE
-date.value = new Date().toISOString().split("T")[0];
+document.getElementById("date").value =
+  new Date().toISOString().split("T")[0];
 
-// SUBMIT
 function submit() {
   const data = {
-    date: date.value,
-    employee: employee.value,
-    task: task.value,
-    start: start.value,
-    end: end.value
+    date: document.getElementById("date").value,
+    employee: document.getElementById("employee").value,
+    task: document.getElementById("task").value,
+    start: document.getElementById("start").value,
+    end: document.getElementById("end").value
   };
 
-  google.script.run.withSuccessHandler(() => {
-    alert("Submitted successfully!");
-  }).submitWork(data);
+  google.script.run
+    .withSuccessHandler(() => {
+      alert("✅ Submitted!");
+    })
+    .withFailureHandler(err => {
+      alert("❌ " + err.message);
+    })
+    .submitWork(data);
 }
 </script>
 
