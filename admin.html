@@ -6,103 +6,131 @@
 
   <style>
     body {
-      font-family: Arial;
       margin: 0;
-      text-align: center;
-
-      /* 🖼 LOGO BACKGROUND CENTER */
-      background: url("https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png") no-repeat center center fixed;
-      background-size: 300px;
-      background-color: #f5f6fa;
+      font-family: "Segoe UI", sans-serif;
+      background: #f4f6f9;
     }
 
-    .overlay {
-      background: rgba(255,255,255,0.9);
-      min-height: 100vh;
-      padding: 20px;
+    /* BACKGROUND LOGO */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: url("https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png") no-repeat center;
+      background-size: 250px;
+      opacity: 0.05;
+      z-index: 0;
     }
 
-    table {
-      border-collapse: collapse;
-      width: 100%;
+    .card {
       background: white;
-      margin-top: 20px;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      margin: 20px auto;
+      width: 95%;
+      max-width: 1200px;
+      position: relative;
+      z-index: 1;
     }
 
-    th, td {
-      border: 1px solid #ddd;
-      padding: 10px;
-    }
-
-    th {
-      background: #222;
-      color: white;
+    h2 {
+      margin-bottom: 10px;
     }
 
     input, button {
       padding: 10px;
       margin: 5px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
     }
 
-    #dashboard {
-      display: none;
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
     }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th {
+      background: #4CAF50;
+      color: white;
+    }
+
+    th, td {
+      padding: 10px;
+      border: 1px solid #eee;
+      text-align: center;
+    }
+
+    #dashboard { display: none; }
   </style>
 </head>
 
 <body>
 
-<div class="overlay">
-
-<!-- LOGIN -->
-<div id="login">
-  <h2>Admin Login</h2>
+<div class="card" id="loginBox">
+  <h2>🔐 Admin Login</h2>
   <input type="password" id="password">
   <button onclick="login()">Login</button>
 </div>
 
-<!-- DASHBOARD -->
 <div id="dashboard">
 
-  <h2>Admin Panel</h2>
+  <div class="card">
+    <h2>📊 Admin Dashboard</h2>
+    <input type="date" id="datePicker">
+  </div>
 
-  <!-- DAY SELECTOR -->
-  <input type="date" id="datePicker">
+  <div class="card">
+    <div id="table"></div>
+  </div>
 
-  <!-- TABLE -->
-  <div id="table"></div>
-
-  <!-- PIE CHART -->
-  <canvas id="chart"></canvas>
-
-</div>
+  <div class="card">
+    <canvas id="chart"></canvas>
+  </div>
 
 </div>
 
 <script>
 let chart;
 
-// LOGIN
+// FIXED LOGIN
 function login() {
-  google.script.run.withSuccessHandler(res => {
-    if (res) {
-      loginDiv.style.display = "none";
-      dashboard.style.display = "block";
-      loadData();
-    } else alert("Wrong password");
-  }).checkLogin(password.value);
+  const pass = document.getElementById("password").value;
+
+  google.script.run
+    .withSuccessHandler(res => {
+      if (res) {
+        document.getElementById("loginBox").style.display = "none";
+        document.getElementById("dashboard").style.display = "block";
+        loadData();
+      } else alert("Wrong password");
+    })
+    .checkLogin(pass);
 }
 
-// DEFAULT DATE
+// DATE DEFAULT
 window.onload = () => {
   const today = new Date().toISOString().split("T")[0];
-  datePicker.value = today;
-  datePicker.addEventListener("change", loadData);
+  const picker = document.getElementById("datePicker");
+  picker.value = today;
+  picker.addEventListener("change", loadData);
 };
 
-// LOAD DATA
+// LOAD
 function loadData() {
-  google.script.run.withSuccessHandler(render).getData(datePicker.value);
+  const date = document.getElementById("datePicker").value;
+
+  google.script.run
+    .withSuccessHandler(render)
+    .getData(date);
 }
 
 // TABLE
@@ -117,25 +145,24 @@ function renderTable(data) {
 
   hours.forEach(h => {
     html += `<tr><td>${h}:00</td>`;
-
     employees.forEach(e => {
       const t = data.find(d => d.hour === h && d.employee === e);
-      html += `<td>${t ? t.task : ""}</td>`;
+      html += `<td>${t ? t.task : "-"}</td>`;
     });
-
     html += "</tr>";
   });
 
   html += "</table>";
-
-  table.innerHTML = html;
+  document.getElementById("table").innerHTML = html;
 }
 
-// PIE
+// CHART
 function renderChart(analysis) {
+  const ctx = document.getElementById("chart");
+
   if (chart) chart.destroy();
 
-  chart = new Chart(chartCanvas, {
+  chart = new Chart(ctx, {
     type: "pie",
     data: {
       labels: Object.keys(analysis),
