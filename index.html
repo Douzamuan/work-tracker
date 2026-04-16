@@ -1,85 +1,87 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <base target="_top">
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
-        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
-        h2 { color: #1a73e8; margin-bottom: 20px; text-align: center; }
-        label { display: block; margin-top: 15px; color: #5f6368; font-size: 14px; }
-        select, input { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #dadce0; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; background: #1a73e8; color: white; border: none; padding: 15px; border-radius: 8px; margin-top: 25px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        button:hover { background: #1765cc; }
-        .loader { display: none; text-align: center; margin-top: 10px; color: #1a73e8; }
-    </style>
+  <base target="_top">
+
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+
+      /* 🖼 LOGO BACKGROUND */
+      background: url("https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png") no-repeat center center fixed;
+      background-size: 300px;
+      background-color: #f5f6fa;
+    }
+
+    .overlay {
+      background: rgba(255,255,255,0.9);
+      min-height: 100vh;
+      padding-top: 50px;
+    }
+
+    .box {
+      background: white;
+      padding: 20px;
+      width: 320px;
+      margin: auto;
+      border-radius: 10px;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+    }
+  </style>
 </head>
+
 <body>
-    <div class="card">
-        <h2>Work Entry</h2>
-        <form id="workForm">
-            <label>Date</label>
-            <input type="date" name="date" required id="dateInput">
 
-            <label>Employee Name</label>
-            <select name="employee" required>
-                <option value="">Select Name</option>
-                <option>John Doe</option>
-                <option>Jane Smith</option>
-                <option>Alex Wong</option>
-            </select>
+<div class="overlay">
 
-            <label>Start Hour (24h)</label>
-            <select name="startHour" required>
-                <option value="9">09:00</option>
-                <option value="10">10:00</option>
-                <option value="11">11:00</option>
-                <option value="12">12:00</option>
-                <option value="13">13:00</option>
-                <option value="14">14:00</option>
-                <option value="15">15:00</option>
-                <option value="16">16:00</option>
-                <option value="17">17:00</option>
-            </select>
+<div class="box">
+  <h2>Submit Work</h2>
 
-            <label>Work Type</label>
-            <select name="workType" required>
-                <option>Office Work</option>
-                <option>Field Work</option>
-                <option>External Work</option>
-            </select>
+  <input type="date" id="date">
+  <input type="text" id="employee" placeholder="Your Name">
 
-            <button type="submit" id="submitBtn">Submit Entry</button>
-            <div id="loader" class="loader">Saving...</div>
-        </form>
-    </div>
+  <input type="text" id="task" placeholder="Task (e.g. Office Work)">
 
-    <script>
-        // Set default date to today
-        document.getElementById('dateInput').valueAsDate = new Date();
+  <select id="start"></select>
+  <select id="end"></select>
 
-        document.getElementById('workForm').onsubmit = function(e) {
-            e.preventDefault();
-            const btn = document.getElementById('submitBtn');
-            const loader = document.getElementById('loader');
-            
-            btn.disabled = true;
-            loader.style.display = 'block';
+  <button onclick="submit()">Submit</button>
+</div>
 
-            const formData = {
-                date: this.date.value,
-                employee: this.employee.value,
-                startHour: this.startHour.value,
-                workType: this.workType.value
-            };
+</div>
 
-            google.script.run.withSuccessHandler(() => {
-                alert("Data Saved Successfully!");
-                this.reset();
-                btn.disabled = false;
-                loader.style.display = 'none';
-                document.getElementById('dateInput').valueAsDate = new Date();
-            }).processForm(formData);
-        };
-    </script>
+<script>
+// TIME DROPDOWN
+for (let i = 9; i <= 17; i++) {
+  const val = (i < 10 ? "0" : "") + i + ":00";
+  start.innerHTML += `<option>${val}</option>`;
+  end.innerHTML += `<option>${val}</option>`;
+}
+
+// DEFAULT DATE
+date.value = new Date().toISOString().split("T")[0];
+
+// SUBMIT
+function submit() {
+  const data = {
+    date: date.value,
+    employee: employee.value,
+    task: task.value,
+    start: start.value,
+    end: end.value
+  };
+
+  google.script.run.withSuccessHandler(() => {
+    alert("Submitted successfully!");
+  }).submitWork(data);
+}
+</script>
+
 </body>
 </html>
