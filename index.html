@@ -1,133 +1,85 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Employee Work</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-body {
-  background: url('https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png') no-repeat center fixed;
-  background-size: 200px;
-  font-family: Arial;
-}
-
-.box {
-  background: rgba(255,255,255,0.9);
-  margin: 30px;
-  padding: 20px;
-  border-radius: 12px;
-}
-
-input, textarea, button {
-  width: 100%;
-  margin: 8px 0;
-  padding: 10px;
-}
-
-button {
-  background: #3f2b96;
-  color: white;
-}
-
-table {
-  width: 100%;
-  margin-top: 15px;
-}
-</style>
+    <base target="_top">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h2 { color: #1a73e8; margin-bottom: 20px; text-align: center; }
+        label { display: block; margin-top: 15px; color: #5f6368; font-size: 14px; }
+        select, input { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #dadce0; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; background: #1a73e8; color: white; border: none; padding: 15px; border-radius: 8px; margin-top: 25px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #1765cc; }
+        .loader { display: none; text-align: center; margin-top: 10px; color: #1a73e8; }
+    </style>
 </head>
-
 <body>
+    <div class="card">
+        <h2>Work Entry</h2>
+        <form id="workForm">
+            <label>Date</label>
+            <input type="date" name="date" required id="dateInput">
 
-<div class="box">
-<h2>Fill Your Work</h2>
+            <label>Employee Name</label>
+            <select name="employee" required>
+                <option value="">Select Name</option>
+                <option>John Doe</option>
+                <option>Jane Smith</option>
+                <option>Alex Wong</option>
+            </select>
 
-<input id="name" placeholder="Your Name">
-<input type="date" id="date">
-<input type="time" id="start">
-<input type="time" id="end">
-<textarea id="work" placeholder="Work"></textarea>
+            <label>Start Hour (24h)</label>
+            <select name="startHour" required>
+                <option value="9">09:00</option>
+                <option value="10">10:00</option>
+                <option value="11">11:00</option>
+                <option value="12">12:00</option>
+                <option value="13">13:00</option>
+                <option value="14">14:00</option>
+                <option value="15">15:00</option>
+                <option value="16">16:00</option>
+                <option value="17">17:00</option>
+            </select>
 
-<button onclick="submitWork()">Submit</button>
+            <label>Work Type</label>
+            <select name="workType" required>
+                <option>Office Work</option>
+                <option>Field Work</option>
+                <option>External Work</option>
+            </select>
 
-<h3>Your Work</h3>
-<div id="table"></div>
+            <button type="submit" id="submitBtn">Submit Entry</button>
+            <div id="loader" class="loader">Saving...</div>
+        </form>
+    </div>
 
-<canvas id="pie"></canvas>
-</div>
+    <script>
+        // Set default date to today
+        document.getElementById('dateInput').valueAsDate = new Date();
 
-<script>
-const URL = "https://script.google.com/macros/s/AKfycbzgW83D5h0KmIf2kQI1F9Le3Ux4Xg8EW5smijMbdTj5F5L_B7f_yVIXJn8OPaA1r4Uqkg/exec";
+        document.getElementById('workForm').onsubmit = function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const loader = document.getElementById('loader');
+            
+            btn.disabled = true;
+            loader.style.display = 'block';
 
-function submitWork() {
-  const employee = document.getElementById("name").value.trim();
-  const date = document.getElementById("date").value;
-  const start = document.getElementById("start").value;
-  const end = document.getElementById("end").value;
-  const work = document.getElementById("work").value.trim();
+            const formData = {
+                date: this.date.value,
+                employee: this.employee.value,
+                startHour: this.startHour.value,
+                workType: this.workType.value
+            };
 
-  if (!employee || !date || !start || !end || !work) {
-    alert("Fill all fields properly");
-    return;
-  }
-
-  const startHour = parseInt(start.split(":")[0]);
-  const endHour = parseInt(end.split(":")[0]);
-
-  if (endHour <= startHour) {
-    alert("End time must be greater than start time");
-    return;
-  }
-
-  fetch(URL, {
-    method: "POST",
-    body: JSON.stringify({
-      employee,
-      date,
-      start: startHour,
-      end: endHour,
-      work
-    })
-  }).then(() => {
-    alert("Submitted successfully");
-    loadData();
-  });
-}
-
-function loadData() {
-  fetch(URL)
-    .then(res => res.json())
-    .then(data => {
-
-      let html = "<table border='1'>";
-      let count = {};
-
-      data.slice(1).forEach(r => {
-
-        for (let i = r[2]; i < r[3]; i++) {
-          html += `<tr>
-            <td>${i}:00</td>
-            <td>${r[4]}</td>
-          </tr>`;
-        }
-
-        count[r[4]] = (count[r[4]] || 0) + 1;
-      });
-
-      html += "</table>";
-      document.getElementById("table").innerHTML = html;
-
-      new Chart(document.getElementById("pie"), {
-        type: 'pie',
-        data: {
-          labels: Object.keys(count),
-          datasets: [{ data: Object.values(count) }]
-        }
-      });
-    });
-}
-
-loadData();
-</script>
-
+            google.script.run.withSuccessHandler(() => {
+                alert("Data Saved Successfully!");
+                this.reset();
+                btn.disabled = false;
+                loader.style.display = 'none';
+                document.getElementById('dateInput').valueAsDate = new Date();
+            }).processForm(formData);
+        };
+    </script>
 </body>
 </html>
