@@ -1,116 +1,69 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Admin Dashboard | Work Tracker</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root {
-            --primary: #4361ee; --office: #4cc9f0; --field: #f72585; --external: #7209b7; --bg: #f8f9fa;
-        }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
-        .login-overlay { position: fixed; inset: 0; background: white; display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .login-box { text-align: center; padding: 40px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-radius: 12px; }
-        input { padding: 10px; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 10px; width: 200px; }
-        button { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+        body { font-family: sans-serif; background: #f4f7f6; padding: 20px; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #eee; padding: 12px; text-align: center; }
+        th { background: #3f2b96; color: white; }
+        .time-col { background: #e8f5e9; font-weight: bold; width: 100px; }
         
-        .dashboard { display: none; max-width: 1200px; margin: 0 auto; }
-        h2 { color: #333; border-left: 5px solid var(--primary); padding-left: 15px; }
+        /* 🔥 Color Coding */
+        .office { background: #bbdefb !important; color: #0d47a1; font-weight: bold; }
+        .field { background: #fff9c4 !important; color: #f57f17; font-weight: bold; }
+        .external { background: #f8bbd0 !important; color: #880e4f; font-weight: bold; }
         
-        .table-container { background: white; border-radius: 12px; overflow-x: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; }
-        table { width: 100%; border-collapse: collapse; min-width: 800px; }
-        th, td { padding: 15px; text-align: center; border: 1px solid #edf2f7; }
-        th { background: #f1f5f9; color: #475569; font-weight: 600; }
-        
-        .time-col { font-weight: bold; background: #f8fafc; color: #64748b; width: 100px; }
-        .cell-office { background: #e0f2fe; color: #0369a1; font-weight: 500; font-size: 12px; border-radius: 4px; }
-        .cell-field { background: #ffedd5; color: #9a3412; font-weight: 500; font-size: 12px; }
-        .cell-external { background: #f3e8ff; color: #6b21a8; font-weight: 500; font-size: 12px; }
-        
-        .chart-section { display: flex; justify-content: center; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .chart-container { width: 400px; }
+        .chart-box { width: 300px; margin: 40px auto; }
     </style>
 </head>
 <body>
-
-<div id="loginOverlay" class="login-overlay">
-    <div class="login-box">
-        <h3>Admin Access</h3>
-        <input type="password" id="adminPass" placeholder="Enter Password"><br>
-        <button onclick="attemptLogin()">Login</button>
-    </div>
-</div>
-
-<div id="dashboard" class="dashboard">
-    <h2>Weekly Employee Grid</h2>
-    <div class="table-container">
-        <table id="workGrid">
-            </table>
-    </div>
-
-    <h2>Work Analysis</h2>
-    <div class="chart-section">
-        <div class="chart-container">
+    <div class="container">
+        <h2 style="text-align:center">Admin Dashboard: Weekly Overview</h2>
+        <table id="adminGrid"><tr><td>Loading Grid...</td></tr></table>
+        
+        <div class="chart-box">
             <canvas id="workChart"></canvas>
         </div>
     </div>
-</div>
 
-<script>
-    function attemptLogin() {
-        const pass = document.getElementById('adminPass').value;
-        google.script.run.withSuccessHandler(function(isValid) {
-            if(isValid) {
-                document.getElementById('loginOverlay').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'block';
-                loadData();
-            } else { alert("Wrong Password!"); }
-        }).checkLogin(pass);
-    }
+    <script>
+        google.script.run.withSuccessHandler(drawDashboard).getAdminData();
 
-    function loadData() {
-        google.script.run.withSuccessHandler(renderDashboard).getAdminData();
-    }
+        function drawDashboard(data) {
+            const employees = [...new Set(data.map(r => r[1]))];
+            const hours = [9, 10, 11, 12, 13, 14, 15, 16, 17];
+            let counts = { "Office": 0, "Field": 0, "External": 0 };
 
-    function renderDashboard(data) {
-        const employees = [...new Set(data.map(r => r[1]))];
-        const hours = [9, 10, 11, 12, 13, 14, 15, 16, 17];
-        let counts = { Office: 0, Field: 0, External: 0 };
+            let html = "<tr><th>TIME</th>" + employees.map(e => `<th>${e}</th>`).join('') + "</tr>";
 
-        let html = `<tr><th>TIME</th>` + employees.map(e => `<th>${e}</th>`).join('') + `</tr>`;
-
-        hours.forEach(h => {
-            html += `<tr><td class="time-col">${h}:00</td>`;
-            employees.forEach(emp => {
-                let entry = data.find(r => r[1] === emp && parseInt(r[2]) === h);
-                let workType = entry ? entry[4] : "";
-                let styleClass = "";
-                
-                if(workType.includes("Office")) { styleClass = "cell-office"; counts.Office++; }
-                else if(workType.includes("Field")) { styleClass = "cell-field"; counts.Field++; }
-                else if(workType.includes("External")) { styleClass = "cell-external"; counts.External++; }
-                
-                html += `<td class="${styleClass}">${workType}</td>`;
+            hours.forEach(h => {
+                html += `<tr><td class="time-col">${h}:00</td>`;
+                employees.forEach(emp => {
+                    let match = data.find(r => r[1] === emp && parseInt(r[2]) === h);
+                    let val = match ? match[4] : "";
+                    let cls = "";
+                    if(val.includes("Office")) { cls = "office"; counts.Office++; }
+                    if(val.includes("Field")) { cls = "field"; counts.Field++; }
+                    if(val.includes("External")) { cls = "external"; counts.External++; }
+                    html += `<td class="${cls}">${val}</td>`;
+                });
+                html += "</tr>";
             });
-            html += `</tr>`;
-        });
+            document.getElementById('adminGrid').innerHTML = html;
 
-        document.getElementById('workGrid').innerHTML = html;
-        renderChart(counts);
-    }
-
-    function renderChart(counts) {
-        new Chart(document.getElementById('workChart'), {
-            type: 'pie',
-            data: {
-                labels: ['Office', 'Field', 'External'],
-                datasets: [{
-                    data: [counts.Office, counts.Field, counts.External],
-                    backgroundColor: ['#4cc9f0', '#f72585', '#7209b7']
-                }]
-            },
-            options: { plugins: { legend: { position: 'bottom' } } }
-        });
-    }
-</script>
+            new Chart(document.getElementById('workChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['Office', 'Field', 'External'],
+                    datasets: [{
+                        data: [counts.Office, counts.Field, counts.External],
+                        backgroundColor: ['#2196f3', '#fbc02d', '#e91e63']
+                    }]
+                }
+            });
+        }
+    </script>
 </body>
 </html>
