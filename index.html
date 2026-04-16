@@ -1,90 +1,125 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Employee Schedule</title>
+<title>Employee Panel</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+  background: url('logo.png') no-repeat center fixed;
+  background-size: 200px;
+  font-family: Arial;
+}
+
+.glass {
+  background: rgba(255,255,255,0.75);
+  padding: 20px;
+  margin: 30px;
+  border-radius: 12px;
+}
+
+input, textarea, button {
+  width: 100%;
+  margin: 8px 0;
+  padding: 10px;
+}
+
+button {
+  background: #3f2b96;
+  color: white;
+}
+
+table {
+  width: 100%;
+  margin-top: 15px;
+}
+</style>
 </head>
 
-<body style="margin:0;font-family:Arial;background:#f4f6f9;">
+<body>
 
-<!-- FIXED LOGO -->
-<div style="
-position:fixed;
-top:50%;
-left:50%;
-transform:translate(-50%, -50%);
-opacity:0.08;
-z-index:-1;">
-<img src="https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png" width="400">
-</div>
+<div class="glass">
+<h2>Employee Work Entry</h2>
 
-<div style="max-width:500px;margin:60px auto;padding:20px;">
+<input id="name" placeholder="Your Name">
+<input type="date" id="date">
+<input type="time" id="start">
+<input type="time" id="end">
+<textarea id="work" placeholder="Work"></textarea>
 
-<h2 style="text-align:center;">Employee Schedule</h2>
+<button onclick="submit()">Submit</button>
 
-<input id="name" placeholder="Your Name"
-style="width:100%;padding:12px;margin-top:10px;border-radius:6px;border:1px solid #ccc;">
+<h3>Your Work Table</h3>
+<div id="table"></div>
 
-<input id="date" type="date"
-style="width:100%;padding:12px;margin-top:10px;border-radius:6px;border:1px solid #ccc;">
-
-<input id="start" placeholder="Start Time (e.g. 9 AM)"
-style="width:100%;padding:12px;margin-top:10px;border-radius:6px;border:1px solid #ccc;">
-
-<input id="end" placeholder="End Time (e.g. 2 PM)"
-style="width:100%;padding:12px;margin-top:10px;border-radius:6px;border:1px solid #ccc;">
-
-<input id="work" placeholder="Work (Office / Sales / Meeting)"
-style="width:100%;padding:12px;margin-top:10px;border-radius:6px;border:1px solid #ccc;">
-
-<button onclick="submitData()" style="
-width:100%;
-padding:12px;
-background:#007bff;
-color:white;
-border:none;
-border-radius:6px;
-margin-top:15px;">
-Submit
-</button>
-
+<canvas id="pie"></canvas>
 </div>
 
 <script>
-function submitData(){
-  const name = document.getElementById("name").value.trim();
-  const date = document.getElementById("date").value;
-  const start = document.getElementById("start").value.trim();
-  const end = document.getElementById("end").value.trim();
-  const work = document.getElementById("work").value.trim();
+const URL = "https://script.google.com/macros/s/AKfycbzgW83D5h0KmIf2kQI1F9Le3Ux4Xg8EW5smijMbdTj5F5L_B7f_yVIXJn8OPaA1r4Uqkg/exec";
 
-  // ✅ FIXED VALIDATION
-  if(!name || !date || !start || !end || !work){
-    alert("Please fill all fields properly");
+function submit() {
+  let data = {
+    employee: name.value,
+    date: date.value,
+    start: start.value,
+    end: end.value,
+    work: work.value
+  };
+
+  if (!data.employee || !data.date || !data.start || !data.end || !data.work) {
+    alert("Fill all fields");
     return;
   }
 
-  const data = {
-    name,
-    date,
-    time: start + " - " + end,
-    work,
-    status: "Pending"
-  };
-
-  fetch("https://script.google.com/macros/s/AKfycbxBfGAQzxtF3HrG-vW6kETljk1B3bnVlEp6G8FLiPYr_Oh7_Z-86qAVd0m6AKnI0qlF_A/execPASTE_SCRIPT_URL", {
-    method:"POST",
+  fetch(URL, {
+    method: "POST",
     body: JSON.stringify(data)
-  })
-  .then(()=>{
-    alert("Submitted Successfully");
-
-    document.getElementById("name").value="";
-    document.getElementById("date").value="";
-    document.getElementById("start").value="";
-    document.getElementById("end").value="";
-    document.getElementById("work").value="";
+  }).then(() => {
+    alert("Saved");
+    load();
   });
 }
+
+function split(start, end) {
+  let s = parseInt(start);
+  let e = parseInt(end);
+  let arr = [];
+  for (let i = s; i < e; i++) {
+    arr.push(i + ":00");
+  }
+  return arr;
+}
+
+function load() {
+  fetch(URL).then(r => r.json()).then(data => {
+    let html = "<table border='1'>";
+    let count = {};
+
+    data.slice(1).forEach(r => {
+      let hours = split(r[2], r[3]);
+
+      hours.forEach(h => {
+        html += `<tr><td>${h}</td><td>${r[4]}</td></tr>`;
+      });
+
+      count[r[4]] = (count[r[4]] || 0) + 1;
+    });
+
+    html += "</table>";
+    table.innerHTML = html;
+
+    new Chart(pie, {
+      type: 'pie',
+      data: {
+        labels: Object.keys(count),
+        datasets: [{ data: Object.values(count) }]
+      }
+    });
+  });
+}
+
+load();
 </script>
 
 </body>
