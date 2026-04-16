@@ -1,69 +1,165 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body { font-family: sans-serif; background: #f4f7f6; padding: 20px; }
-        .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #eee; padding: 12px; text-align: center; }
-        th { background: #3f2b96; color: white; }
-        .time-col { background: #e8f5e9; font-weight: bold; width: 100px; }
-        
-        /* 🔥 Color Coding */
-        .office { background: #bbdefb !important; color: #0d47a1; font-weight: bold; }
-        .field { background: #fff9c4 !important; color: #f57f17; font-weight: bold; }
-        .external { background: #f8bbd0 !important; color: #880e4f; font-weight: bold; }
-        
-        .chart-box { width: 300px; margin: 40px auto; }
-    </style>
+  <base target="_top">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      background: #f5f6fa;
+    }
+
+    .container {
+      width: 90%;
+      margin: auto;
+    }
+
+    .logo {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .logo img {
+      width: 120px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+      background: white;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+
+    th {
+      background: #333;
+      color: white;
+    }
+
+    #dashboard {
+      display: none;
+    }
+  </style>
 </head>
+
 <body>
-    <div class="container">
-        <h2 style="text-align:center">Admin Dashboard: Weekly Overview</h2>
-        <table id="adminGrid"><tr><td>Loading Grid...</td></tr></table>
-        
-        <div class="chart-box">
-            <canvas id="workChart"></canvas>
-        </div>
-    </div>
 
-    <script>
-        google.script.run.withSuccessHandler(drawDashboard).getAdminData();
+<!-- 🖼️ LOGO CENTERED -->
+<div class="logo">
+  <img src="https://via.placeholder.com/120" id="logo">
+</div>
 
-        function drawDashboard(data) {
-            const employees = [...new Set(data.map(r => r[1]))];
-            const hours = [9, 10, 11, 12, 13, 14, 15, 16, 17];
-            let counts = { "Office": 0, "Field": 0, "External": 0 };
+<!-- 🔐 LOGIN -->
+<div id="login">
+  <h2>Admin Login</h2>
+  <input type="password" id="password" placeholder="Enter password">
+  <button onclick="login()">Login</button>
+</div>
 
-            let html = "<tr><th>TIME</th>" + employees.map(e => `<th>${e}</th>`).join('') + "</tr>";
+<!-- 📊 DASHBOARD -->
+<div id="dashboard" class="container">
 
-            hours.forEach(h => {
-                html += `<tr><td class="time-col">${h}:00</td>`;
-                employees.forEach(emp => {
-                    let match = data.find(r => r[1] === emp && parseInt(r[2]) === h);
-                    let val = match ? match[4] : "";
-                    let cls = "";
-                    if(val.includes("Office")) { cls = "office"; counts.Office++; }
-                    if(val.includes("Field")) { cls = "field"; counts.Field++; }
-                    if(val.includes("External")) { cls = "external"; counts.External++; }
-                    html += `<td class="${cls}">${val}</td>`;
-                });
-                html += "</tr>";
-            });
-            document.getElementById('adminGrid').innerHTML = html;
+  <h2>Admin Panel</h2>
 
-            new Chart(document.getElementById('workChart'), {
-                type: 'pie',
-                data: {
-                    labels: ['Office', 'Field', 'External'],
-                    datasets: [{
-                        data: [counts.Office, counts.Field, counts.External],
-                        backgroundColor: ['#2196f3', '#fbc02d', '#e91e63']
-                    }]
-                }
-            });
-        }
-    </script>
+  <!-- 📅 DAY SELECTOR -->
+  <input type="date" id="datePicker">
+
+  <!-- 📋 TABLE -->
+  <div id="table"></div>
+
+  <!-- 🥧 PIE CHART -->
+  <canvas id="chart" width="400" height="200"></canvas>
+
+</div>
+
+<script>
+let chart;
+
+// 🔐 LOGIN
+function login() {
+  const password = document.getElementById("password").value;
+
+  google.script.run.withSuccessHandler(res => {
+    if (res) {
+      document.getElementById("login").style.display = "none";
+      document.getElementById("dashboard").style.display = "block";
+      loadData();
+    } else {
+      alert("Wrong password");
+    }
+  }).checkLogin(password);
+}
+
+// 📅 DEFAULT TODAY
+window.onload = () => {
+  const today = new Date().toISOString().split("T")[0];
+  document.getElementById("datePicker").value = today;
+  document.getElementById("datePicker").addEventListener("change", loadData);
+};
+
+// 📊 LOAD DATA
+function loadData() {
+  const date = document.getElementById("datePicker").value;
+
+  google.script.run.withSuccessHandler(render).getData(date);
+}
+
+// 📋 RENDER TABLE + CHART
+function render(data) {
+  renderTable(data.hourly);
+  renderChart(data.analysis);
+}
+
+// 📋 TABLE
+function renderTable(data) {
+  const hours = [...Array(9).keys()].map(i => i + 9);
+  const employees = [...new Set(data.map(d => d.employee))];
+
+  let html = "<table><tr><th>Hour</th>";
+
+  employees.forEach(e => html += `<th>${e}</th>`);
+  html += "</tr>";
+
+  hours.forEach(h => {
+    html += `<tr><td>${h}:00</td>`;
+
+    employees.forEach(e => {
+      const task = data.find(d => d.hour === h && d.employee === e);
+      html += `<td>${task ? task.task : ""}</td>`;
+    });
+
+    html += "</tr>";
+  });
+
+  html += "</table>";
+
+  document.getElementById("table").innerHTML = html;
+}
+
+// 🥧 PIE CHART
+function renderChart(analysis) {
+  const ctx = document.getElementById("chart");
+
+  if (chart) chart.destroy();
+
+  chart = new Chart(ctx, {
+    type: "pie",
+    data: {
+      labels: Object.keys(analysis),
+      datasets: [{
+        data: Object.values(analysis)
+      }]
+    }
+  });
+}
+</script>
+
 </body>
 </html>
