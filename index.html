@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Employee Panel</title>
+<title>Employee Work</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 body {
-  background: url('logo.png') no-repeat center fixed;
+  background: url('https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png') no-repeat center fixed;
   background-size: 200px;
   font-family: Arial;
 }
 
-.glass {
-  background: rgba(255,255,255,0.75);
-  padding: 20px;
+.box {
+  background: rgba(255,255,255,0.9);
   margin: 30px;
+  padding: 20px;
   border-radius: 12px;
 }
 
@@ -38,8 +38,8 @@ table {
 
 <body>
 
-<div class="glass">
-<h2>Employee Work Entry</h2>
+<div class="box">
+<h2>Fill Your Work</h2>
 
 <input id="name" placeholder="Your Name">
 <input type="date" id="date">
@@ -47,9 +47,9 @@ table {
 <input type="time" id="end">
 <textarea id="work" placeholder="Work"></textarea>
 
-<button onclick="submit()">Submit</button>
+<button onclick="submitWork()">Submit</button>
 
-<h3>Your Work Table</h3>
+<h3>Your Work</h3>
 <div id="table"></div>
 
 <canvas id="pie"></canvas>
@@ -58,68 +58,75 @@ table {
 <script>
 const URL = "https://script.google.com/macros/s/AKfycbzgW83D5h0KmIf2kQI1F9Le3Ux4Xg8EW5smijMbdTj5F5L_B7f_yVIXJn8OPaA1r4Uqkg/exec";
 
-function submit() {
-  let data = {
-    employee: name.value,
-    date: date.value,
-    start: start.value,
-    end: end.value,
-    work: work.value
-  };
+function submitWork() {
+  const employee = document.getElementById("name").value.trim();
+  const date = document.getElementById("date").value;
+  const start = document.getElementById("start").value;
+  const end = document.getElementById("end").value;
+  const work = document.getElementById("work").value.trim();
 
-  if (!data.employee || !data.date || !data.start || !data.end || !data.work) {
-    alert("Fill all fields");
+  if (!employee || !date || !start || !end || !work) {
+    alert("Fill all fields properly");
+    return;
+  }
+
+  const startHour = parseInt(start.split(":")[0]);
+  const endHour = parseInt(end.split(":")[0]);
+
+  if (endHour <= startHour) {
+    alert("End time must be greater than start time");
     return;
   }
 
   fetch(URL, {
     method: "POST",
-    body: JSON.stringify(data)
+    body: JSON.stringify({
+      employee,
+      date,
+      start: startHour,
+      end: endHour,
+      work
+    })
   }).then(() => {
-    alert("Saved");
-    load();
+    alert("Submitted successfully");
+    loadData();
   });
 }
 
-function split(start, end) {
-  let s = parseInt(start);
-  let e = parseInt(end);
-  let arr = [];
-  for (let i = s; i < e; i++) {
-    arr.push(i + ":00");
-  }
-  return arr;
-}
+function loadData() {
+  fetch(URL)
+    .then(res => res.json())
+    .then(data => {
 
-function load() {
-  fetch(URL).then(r => r.json()).then(data => {
-    let html = "<table border='1'>";
-    let count = {};
+      let html = "<table border='1'>";
+      let count = {};
 
-    data.slice(1).forEach(r => {
-      let hours = split(r[2], r[3]);
+      data.slice(1).forEach(r => {
 
-      hours.forEach(h => {
-        html += `<tr><td>${h}</td><td>${r[4]}</td></tr>`;
+        for (let i = r[2]; i < r[3]; i++) {
+          html += `<tr>
+            <td>${i}:00</td>
+            <td>${r[4]}</td>
+          </tr>`;
+        }
+
+        count[r[4]] = (count[r[4]] || 0) + 1;
       });
 
-      count[r[4]] = (count[r[4]] || 0) + 1;
-    });
+      html += "</table>";
+      document.getElementById("table").innerHTML = html;
 
-    html += "</table>";
-    table.innerHTML = html;
-
-    new Chart(pie, {
-      type: 'pie',
-      data: {
-        labels: Object.keys(count),
-        datasets: [{ data: Object.values(count) }]
-      }
+      new Chart(document.getElementById("pie"), {
+        type: 'pie',
+        data: {
+          labels: Object.keys(count),
+          datasets: [{ data: Object.values(count) }]
+        }
+      });
     });
-  });
 }
 
-load();
+loadData();
 </script>
 
 </body>
