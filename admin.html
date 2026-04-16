@@ -3,142 +3,58 @@
 <head>
   <base target="_top">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <style>
-    body {
-      margin: 0;
-      font-family: "Segoe UI", sans-serif;
-      background: #f4f6f9;
-    }
-
-    /* BACKGROUND LOGO */
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      background: url("https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png") no-repeat center;
-      background-size: 250px;
-      opacity: 0.05;
-      z-index: 0;
-    }
-
-    .card {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      margin: 20px auto;
-      width: 95%;
-      max-width: 1200px;
-      position: relative;
-      z-index: 1;
-    }
-
-    h2 {
-      margin-bottom: 10px;
-    }
-
-    input, button {
-      padding: 10px;
-      margin: 5px;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-    }
-
-    button {
-      background: #4CAF50;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-
-    th {
-      background: #4CAF50;
-      color: white;
-    }
-
-    th, td {
-      padding: 10px;
-      border: 1px solid #eee;
-      text-align: center;
-    }
-
-    #dashboard { display: none; }
-  </style>
 </head>
 
 <body>
 
-<div class="card" id="loginBox">
-  <h2>🔐 Admin Login</h2>
-  <input type="password" id="password">
-  <button onclick="login()">Login</button>
-</div>
+<h2>Admin Login</h2>
+<input type="password" id="pass">
+<button onclick="login()">Login</button>
 
-<div id="dashboard">
+<div id="panel" style="display:none">
 
-  <div class="card">
-    <h2>📊 Admin Dashboard</h2>
-    <input type="date" id="datePicker">
-  </div>
-
-  <div class="card">
-    <div id="table"></div>
-  </div>
-
-  <div class="card">
-    <canvas id="chart"></canvas>
-  </div>
+  <input type="date" id="date">
+  <div id="table"></div>
+  <canvas id="chart"></canvas>
 
 </div>
 
 <script>
 let chart;
 
-// FIXED LOGIN
 function login() {
-  const pass = document.getElementById("password").value;
+  const p = document.getElementById("pass").value;
 
   google.script.run
     .withSuccessHandler(res => {
       if (res) {
-        document.getElementById("loginBox").style.display = "none";
-        document.getElementById("dashboard").style.display = "block";
-        loadData();
-      } else alert("Wrong password");
+        document.getElementById("panel").style.display = "block";
+        load();
+      } else {
+        alert("Wrong password");
+      }
     })
-    .checkLogin(pass);
+    .checkLogin(p);
 }
 
-// DATE DEFAULT
-window.onload = () => {
-  const today = new Date().toISOString().split("T")[0];
-  const picker = document.getElementById("datePicker");
-  picker.value = today;
-  picker.addEventListener("change", loadData);
-};
-
-// LOAD
-function loadData() {
-  const date = document.getElementById("datePicker").value;
+function load() {
+  const d = document.getElementById("date").value;
 
   google.script.run
     .withSuccessHandler(render)
-    .getData(date);
+    .getData(d);
 }
 
-// TABLE
+function render(data) {
+  renderTable(data.hourly);
+  renderChart(data.analysis);
+}
+
 function renderTable(data) {
-  const hours = [...Array(9).keys()].map(i => i + 9);
+  const hours = [9,10,11,12,13,14,15,16,17];
   const employees = [...new Set(data.map(d => d.employee))];
 
-  let html = "<table><tr><th>Hour</th>";
+  let html = "<table border='1'><tr><th>Hour</th>";
 
   employees.forEach(e => html += `<th>${e}</th>`);
   html += "</tr>";
@@ -146,8 +62,8 @@ function renderTable(data) {
   hours.forEach(h => {
     html += `<tr><td>${h}:00</td>`;
     employees.forEach(e => {
-      const t = data.find(d => d.hour === h && d.employee === e);
-      html += `<td>${t ? t.task : "-"}</td>`;
+      const t = data.find(x => x.hour == h && x.employee == e);
+      html += `<td>${t ? t.task : ""}</td>`;
     });
     html += "</tr>";
   });
@@ -156,7 +72,6 @@ function renderTable(data) {
   document.getElementById("table").innerHTML = html;
 }
 
-// CHART
 function renderChart(analysis) {
   const ctx = document.getElementById("chart");
 
@@ -171,11 +86,10 @@ function renderChart(analysis) {
   });
 }
 
-// MAIN
-function render(data) {
-  renderTable(data.hourly);
-  renderChart(data.analysis);
-}
+// DEFAULT DATE
+document.getElementById("date").value =
+  new Date().toISOString().split("T")[0];
+
 </script>
 
 </body>
