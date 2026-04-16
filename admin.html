@@ -2,211 +2,114 @@
 <html>
 <head>
 <title>Admin Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+  background: url('logo.png') no-repeat center fixed;
+  background-size: 200px;
+}
+
+.glass {
+  background: rgba(255,255,255,0.75);
+  padding: 20px;
+  margin: 30px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+td, th {
+  padding: 10px;
+  text-align: center;
+  border: 1px solid #ccc;
+}
+
+th {
+  background: #3f2b96;
+  color: white;
+}
+</style>
 </head>
 
-<body style="margin:0; font-family:Arial; background:#f4f6f9;">
+<body>
 
-<!-- 🔥 FIXED LOGO -->
-<div style="
-position:fixed;
-top:50%;
-left:50%;
-transform:translate(-50%, -50%);
-opacity:0.1;
-z-index:-1;">
-<img src="https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png" width="500">
-</div>
-
-<div style="padding:20px;">
-
-<!-- 🔐 LOGIN -->
-<div id="loginBox" style="text-align:center;">
+<div id="login" class="glass">
 <h2>Admin Login</h2>
-
-<input id="email" placeholder="Email"><br><br>
-<input id="password" type="password" placeholder="Password"><br><br>
-
+<input type="password" id="pass">
 <button onclick="login()">Login</button>
 </div>
 
-<!-- 📊 DASHBOARD -->
-<div id="dashboard" style="display:none;">
+<div id="panel" style="display:none" class="glass">
+<h2>Weekly Work Schedule</h2>
 
-<h2 style="text-align:center;">Weekly Work Schedule</h2>
+<select id="mode" onchange="load()">
+<option value="day">Day</option>
+<option value="week">Week</option>
+<option value="month">Month</option>
+</select>
 
-<!-- 👤 EMPLOYEE SELECT -->
-<select id="employee" onchange="loadGrid()"></select>
+<div id="grid"></div>
 
-<!-- 📅 GRID -->
-<table border="1" style="
-width:100%;
-border-collapse:collapse;
-margin-top:20px;
-background:rgba(255,255,255,0.4);
-backdrop-filter:blur(5px);">
-
-<thead>
-<tr style="background:#2f5d50; color:white;">
-<th>TIME</th>
-<th>MONDAY</th>
-<th>TUESDAY</th>
-<th>WEDNESDAY</th>
-<th>THURSDAY</th>
-<th>FRIDAY</th>
-</tr>
-</thead>
-
-<tbody id="grid"></tbody>
-
-</table>
-
-<!-- ➕ ADD EMPLOYEE -->
-<h3>Add Employee</h3>
-<input id="newEmp" placeholder="Employee Name">
-<button onclick="addEmp()">Add</button>
-
-<!-- 👥 EMPLOYEE LIST -->
-<h3>Employees</h3>
-<div id="empList"></div>
-
-</div>
-
+<canvas id="bar"></canvas>
 </div>
 
 <script>
-const URL = "https://script.google.com/macros/s/AKfycbxBfGAQzxtF3HrG-vW6kETljk1B3bnVlEp6G8FLiPYr_Oh7_Z-86qAVd0m6AKnI0qlF_A/exec";
+const URL = "https://script.google.com/macros/s/AKfycbzgW83D5h0KmIf2kQI1F9Le3Ux4Xg8EW5smijMbdTj5F5L_B7f_yVIXJn8OPaA1r4Uqkg/exec";
+const PASS = "Chikim-khomhite";
 
-// 🔐 CHANGE THESE
-const ADMIN_EMAIL = "davidthangchikim@gmail.com";
-const ADMIN_PASSWORD = "Chikim-khomhite";
-
-// 🔐 LOGIN
-function login(){
-  if(email.value === ADMIN_EMAIL && password.value === ADMIN_PASSWORD){
-    loginBox.style.display="none";
-    dashboard.style.display="block";
-
-    loadEmployees();
-    loadEmpList();
-
-    setInterval(loadGrid, 5000);
+function login() {
+  if (pass.value === PASS) {
+    login.style.display = "none";
+    panel.style.display = "block";
+    load();
   } else {
-    alert("Invalid login");
+    alert("Wrong password");
   }
 }
 
-// 📥 LOAD EMPLOYEES INTO DROPDOWN
-function loadEmployees(){
-  fetch(URL + "?action=getEmployees")
-  .then(r=>r.json())
-  .then(data=>{
-    employee.innerHTML = data.map(n=>`<option>${n}</option>`).join("");
-    loadGrid();
-  });
-}
+function load() {
+  fetch(URL).then(r => r.json()).then(data => {
+    let employees = [...new Set(data.slice(1).map(r => r[1]))];
 
-// 👥 LOAD EMPLOYEE LIST (BOTTOM)
-function loadEmpList(){
-  fetch(URL + "?action=getEmployees")
-  .then(r=>r.json())
-  .then(data=>{
-    empList.innerHTML = data.map(n=>`
-      <span style="
-        margin:5px;
-        padding:5px 10px;
-        background:#ddd;
-        border-radius:5px;
-        display:inline-block;">
-        ${n}
-      </span>
-    `).join("");
-  });
-}
+    let html = "<table><tr><th>Time</th>";
 
-// ➕ ADD EMPLOYEE
-function addEmp(){
-  if(!newEmp.value){
-    alert("Enter name");
-    return;
-  }
+    employees.forEach(e => html += `<th>${e}</th>`);
+    html += "</tr>";
 
-  fetch(URL + "?action=addEmployee&name=" + newEmp.value)
-  .then(()=>{
-    newEmp.value="";
-    loadEmployees();
-    loadEmpList();
-  });
-}
+    for (let i = 9; i <= 17; i++) {
+      html += `<tr><td>${i}:00</td>`;
 
-// 📅 DAY CONVERT
-function getDayName(dateStr){
-  const d = new Date(dateStr);
-  return ["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY"][d.getDay()];
-}
-
-// 🎨 COLOR LOGIC
-function getColor(work){
-  work = work.toLowerCase();
-
-  if(work.includes("office")) return "#f7d774";
-  if(work.includes("sales")) return "#2ecc71";
-  if(work.includes("meeting")) return "#3498db";
-
-  return "#ccc";
-}
-
-// ⏰ FORMAT TIME
-function formatHour(h){
-  return `${convert(h)} - ${convert(h+1)}`;
-}
-
-function convert(h){
-  let ampm = h >= 12 ? "PM" : "AM";
-  let hour = h % 12 || 12;
-  return hour + ":00 " + ampm;
-}
-
-// 📊 LOAD GRID
-function loadGrid(){
-  fetch(URL)
-  .then(r=>r.json())
-  .then(data=>{
-
-    const emp = employee.value;
-
-    let html = "";
-
-    for(let h=9; h<17; h++){
-
-      html += `<tr>
-        <td>${formatHour(h)}</td>`;
-
-      ["MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY"].forEach(day=>{
-
-        const entry = data.find(d =>
-          d.name === emp &&
-          d.start === h &&
-          getDayName(d.date) === day
+      employees.forEach(emp => {
+        let found = data.find(r =>
+          r[1] === emp &&
+          parseInt(r[2]) <= i &&
+          parseInt(r[3]) > i
         );
 
-        if(entry){
-          const color = getColor(entry.work);
-          html += `<td style="
-            background:${color};
-            font-weight:bold;
-            text-align:center;">
-            ${entry.work}
-          </td>`;
-        } else {
-          html += `<td></td>`;
-        }
-
+        html += `<td>${found ? found[4] : ""}</td>`;
       });
 
-      html += `</tr>`;
+      html += "</tr>";
     }
 
+    html += "</table>";
     grid.innerHTML = html;
+
+    let count = {};
+    data.slice(1).forEach(r => {
+      count[r[1]] = (count[r[1]] || 0) + 1;
+    });
+
+    new Chart(bar, {
+      type: 'bar',
+      data: {
+        labels: Object.keys(count),
+        datasets: [{ data: Object.values(count) }]
+      }
+    });
   });
 }
 </script>
