@@ -7,40 +7,41 @@
   <style>
     body {
       font-family: Arial;
+      margin: 0;
       text-align: center;
-      background: #f5f6fa;
+
+      /* 🖼 LOGO BACKGROUND CENTER */
+      background: url("https://raw.githubusercontent.com/Douzamuan/work-tracker/main/logo.png") no-repeat center center fixed;
+      background-size: 300px;
+      background-color: #f5f6fa;
     }
 
-    .container {
-      width: 90%;
-      margin: auto;
-    }
-
-    .logo {
-      display: flex;
-      justify-content: center;
-      margin-top: 20px;
-    }
-
-    .logo img {
-      width: 120px;
+    .overlay {
+      background: rgba(255,255,255,0.9);
+      min-height: 100vh;
+      padding: 20px;
     }
 
     table {
       border-collapse: collapse;
       width: 100%;
-      margin-top: 20px;
       background: white;
+      margin-top: 20px;
     }
 
     th, td {
       border: 1px solid #ddd;
-      padding: 8px;
+      padding: 10px;
     }
 
     th {
-      background: #333;
+      background: #222;
       color: white;
+    }
+
+    input, button {
+      padding: 10px;
+      margin: 5px;
     }
 
     #dashboard {
@@ -51,73 +52,60 @@
 
 <body>
 
-<!-- 🖼️ LOGO CENTERED -->
-<div class="logo">
-  <img src="https://via.placeholder.com/120" id="logo">
-</div>
+<div class="overlay">
 
-<!-- 🔐 LOGIN -->
+<!-- LOGIN -->
 <div id="login">
   <h2>Admin Login</h2>
-  <input type="password" id="password" placeholder="Enter password">
+  <input type="password" id="password">
   <button onclick="login()">Login</button>
 </div>
 
-<!-- 📊 DASHBOARD -->
-<div id="dashboard" class="container">
+<!-- DASHBOARD -->
+<div id="dashboard">
 
   <h2>Admin Panel</h2>
 
-  <!-- 📅 DAY SELECTOR -->
+  <!-- DAY SELECTOR -->
   <input type="date" id="datePicker">
 
-  <!-- 📋 TABLE -->
+  <!-- TABLE -->
   <div id="table"></div>
 
-  <!-- 🥧 PIE CHART -->
-  <canvas id="chart" width="400" height="200"></canvas>
+  <!-- PIE CHART -->
+  <canvas id="chart"></canvas>
+
+</div>
 
 </div>
 
 <script>
 let chart;
 
-// 🔐 LOGIN
+// LOGIN
 function login() {
-  const password = document.getElementById("password").value;
-
   google.script.run.withSuccessHandler(res => {
     if (res) {
-      document.getElementById("login").style.display = "none";
-      document.getElementById("dashboard").style.display = "block";
+      loginDiv.style.display = "none";
+      dashboard.style.display = "block";
       loadData();
-    } else {
-      alert("Wrong password");
-    }
-  }).checkLogin(password);
+    } else alert("Wrong password");
+  }).checkLogin(password.value);
 }
 
-// 📅 DEFAULT TODAY
+// DEFAULT DATE
 window.onload = () => {
   const today = new Date().toISOString().split("T")[0];
-  document.getElementById("datePicker").value = today;
-  document.getElementById("datePicker").addEventListener("change", loadData);
+  datePicker.value = today;
+  datePicker.addEventListener("change", loadData);
 };
 
-// 📊 LOAD DATA
+// LOAD DATA
 function loadData() {
-  const date = document.getElementById("datePicker").value;
-
-  google.script.run.withSuccessHandler(render).getData(date);
+  google.script.run.withSuccessHandler(render).getData(datePicker.value);
 }
 
-// 📋 RENDER TABLE + CHART
-function render(data) {
-  renderTable(data.hourly);
-  renderChart(data.analysis);
-}
-
-// 📋 TABLE
+// TABLE
 function renderTable(data) {
   const hours = [...Array(9).keys()].map(i => i + 9);
   const employees = [...new Set(data.map(d => d.employee))];
@@ -131,8 +119,8 @@ function renderTable(data) {
     html += `<tr><td>${h}:00</td>`;
 
     employees.forEach(e => {
-      const task = data.find(d => d.hour === h && d.employee === e);
-      html += `<td>${task ? task.task : ""}</td>`;
+      const t = data.find(d => d.hour === h && d.employee === e);
+      html += `<td>${t ? t.task : ""}</td>`;
     });
 
     html += "</tr>";
@@ -140,24 +128,26 @@ function renderTable(data) {
 
   html += "</table>";
 
-  document.getElementById("table").innerHTML = html;
+  table.innerHTML = html;
 }
 
-// 🥧 PIE CHART
+// PIE
 function renderChart(analysis) {
-  const ctx = document.getElementById("chart");
-
   if (chart) chart.destroy();
 
-  chart = new Chart(ctx, {
+  chart = new Chart(chartCanvas, {
     type: "pie",
     data: {
       labels: Object.keys(analysis),
-      datasets: [{
-        data: Object.values(analysis)
-      }]
+      datasets: [{ data: Object.values(analysis) }]
     }
   });
+}
+
+// MAIN
+function render(data) {
+  renderTable(data.hourly);
+  renderChart(data.analysis);
 }
 </script>
 
