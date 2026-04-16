@@ -3,45 +3,17 @@
 <head>
   <base target="_top">
 </head>
-
 <body>
 
-<h2>Submit Work</h2>
+<h2>TEST BUTTON</h2>
 
-<input type="date" id="date"><br>
-<input type="text" id="employee" placeholder="Name"><br>
-<input type="text" id="task" placeholder="Task"><br>
-
-<select id="start"></select>
-<select id="end"></select><br>
-
-<button onclick="submit()">Submit</button>
+<button onclick="test()">Click Me</button>
 
 <script>
-const start = document.getElementById("start");
-const end = document.getElementById("end");
-
-for (let i = 9; i <= 17; i++) {
-  start.innerHTML += `<option value="${i}">${i}:00</option>`;
-  end.innerHTML += `<option value="${i}">${i}:00</option>`;
-}
-
-document.getElementById("date").value =
-  new Date().toISOString().split("T")[0];
-
-function submit() {
-  const data = {
-    date: document.getElementById("date").value,
-    employee: document.getElementById("employee").value,
-    task: document.getElementById("task").value,
-    start: document.getElementById("start").value,
-    end: document.getElementById("end").value
-  };
-
+function test() {
   google.script.run
-    .withSuccessHandler(() => alert("Submitted"))
-    .withFailureHandler(e => alert(e.message))
-    .submitWork(data);
+    .withSuccessHandler(res => alert(res))
+    .submitTest();
 }
 </script>
 
